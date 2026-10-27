@@ -1,0 +1,127 @@
+---- Minecraft Crash Report ----
+// Oh - I know what I did wrong!
+
+Time: 2026-10-24 18:18:34
+Description: Initializing game
+
+java.lang.BootstrapMethodError: java.lang.RuntimeException: Mixin transformation of net.minecraft.client.render.WorldRenderer failed
+	at knot//net.minecraft.client.option.GameOptions.method_76780(GameOptions.java:1637)
+	at knot//net.minecraft.client.option.SimpleOption.setValue(SimpleOption.java:154)
+	at knot//net.minecraft.client.option.GraphicsMode.applyOption(GraphicsMode.java:113)
+	at knot//net.minecraft.client.option.GraphicsMode.apply(GraphicsMode.java:66)
+	at knot//net.minecraft.client.option.GameOptions.applyGraphicsMode(GameOptions.java:218)
+	at knot//net.minecraft.client.MinecraftClient.<init>(MinecraftClient.java:537)
+	at knot//net.minecraft.client.main.Main.main(Main.java:234)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+Caused by: java.lang.RuntimeException: Mixin transformation of net.minecraft.client.render.WorldRenderer failed
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:441)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.tryLoadClass(KnotClassDelegate.java:337)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.loadClass(KnotClassDelegate.java:232)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassLoader.loadClass(KnotClassLoader.java:119)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	... 11 more
+Caused by: org.spongepowered.asm.mixin.transformer.throwables.MixinTransformerError: An unexpected critical error was encountered
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:380)
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClass(MixinTransformer.java:237)
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClassBytes(MixinTransformer.java:202)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:436)
+	... 15 more
+Caused by: org.spongepowered.asm.mixin.throwables.MixinApplyError: Mixin [bleachhack.mixins.json:AccessorWorldRenderer from mod bleachhack] from phase [DEFAULT] in config [bleachhack.mixins.json] FAILED during APPLY
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.handleMixinError(MixinProcessor.java:685)
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.handleMixinApplyError(MixinProcessor.java:636)
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:367)
+	... 18 more
+Caused by: org.spongepowered.asm.mixin.gen.throwables.InvalidAccessorException: No candidates were found matching frustum:Lnet/minecraft/client/render/Frustum; in net/minecraft/client/render/WorldRenderer for bleachhack.mixins.json:AccessorWorldRenderer from mod bleachhack->@Accessor[FIELD_GETTER]::getFrustum()Lnet/minecraft/client/render/Frustum; [ACCESSOR Applicator Phase -> bleachhack.mixins.json:AccessorWorldRenderer from mod bleachhack -> Apply Accessors ->  -> Locate -> bleachhack.mixins.json:AccessorWorldRenderer from mod bleachhack->@Accessor[FIELD_GETTER]::getFrustum()Lnet/minecraft/client/render/Frustum;]
+	at org.spongepowered.asm.mixin.gen.AccessorInfo.findTarget(AccessorInfo.java:519)
+	at org.spongepowered.asm.mixin.gen.AccessorInfo.findTargetField(AccessorInfo.java:502)
+	at org.spongepowered.asm.mixin.gen.AccessorInfo.locate(AccessorInfo.java:475)
+	at org.spongepowered.asm.mixin.transformer.MixinTargetContext.generateAccessors(MixinTargetContext.java:1509)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.applyAccessors(MixinApplicatorStandard.java:841)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.lambda$runApplicatorPass$5(MixinApplicatorStandard.java:343)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.processMixins(MixinApplicatorStandard.java:381)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.runApplicatorPass(MixinApplicatorStandard.java:341)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.apply(MixinApplicatorStandard.java:240)
+	at org.spongepowered.asm.mixin.transformer.TargetClassContext.apply(TargetClassContext.java:437)
+	at org.spongepowered.asm.mixin.transformer.TargetClassContext.applyMixins(TargetClassContext.java:418)
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:351)
+	... 18 more
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at knot//net.minecraft.client.option.GameOptions.method_76780(GameOptions.java:1637)
+	at knot//net.minecraft.client.option.SimpleOption.setValue(SimpleOption.java:154)
+	at knot//net.minecraft.client.option.GraphicsMode.applyOption(GraphicsMode.java:113)
+	at knot//net.minecraft.client.option.GraphicsMode.apply(GraphicsMode.java:66)
+	at knot//net.minecraft.client.option.GameOptions.applyGraphicsMode(GameOptions.java:218)
+	at knot//net.minecraft.client.MinecraftClient.<init>(MinecraftClient.java:537)
+
+-- Initialization --
+Details:
+	Modules: 
+Stacktrace:
+	at knot//net.minecraft.client.main.Main.main(Main.java:234)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.21.11
+	Minecraft Version ID: 1.21.11
+	Operating System: Linux (amd64) version 6.1.0-53-amd64
+	Java Version: 21.0.12.1, Eclipse Adoptium
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Eclipse Adoptium
+	Memory: 63204160 bytes (60 MiB) / 380633088 bytes (363 MiB) up to 2061500416 bytes (1966 MiB)
+	CPUs: 8
+	Processor Vendor: GenuineIntel
+	Processor Name: Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz
+	Identifier: Intel64 Family 6 Model 60 Stepping 3
+	Microarchitecture: Haswell (Client)
+	Frequency (GHz): 2.60
+	Number of physical packages: 1
+	Number of physical CPUs: 4
+	Number of logical CPUs: 8
+	Graphics card #0 name: 4th Gen Core Processor Integrated Graphics Controller
+	Graphics card #0 vendor: Intel Corporation (0x8086)
+	Graphics card #0 VRAM (MiB): 256.00
+	Graphics card #0 deviceId: 0x0416
+	Graphics card #0 versionInfo: unknown
+	Graphics card #1 name: GM107M [GeForce GTX 960M]
+	Graphics card #1 vendor: NVIDIA Corporation (0x10de)
+	Graphics card #1 VRAM (MiB): 288.00
+	Graphics card #1 deviceId: 0x139b
+	Graphics card #1 versionInfo: unknown
+	Virtual memory max (MiB): 4907.32
+	Virtual memory used (MiB): 5091.80
+	Swap memory total (MiB): 976.00
+	Swap memory used (MiB): 8.25
+	Space in storage for jna.tmpdir (MiB): <path not set>
+	Space in storage for org.lwjgl.system.SharedLibraryExtractPath (MiB): <path not set>
+	Space in storage for io.netty.native.workdir (MiB): <path not set>
+	Space in storage for java.io.tmpdir (MiB): available: 346469.44, total: 478159.00
+	Space in storage for workdir (MiB): available: 346469.44, total: 478159.00
+	JVM Flags: 1 total; -XX:StackShadowPages=32
+	Debug Flags: 0 total; 
+	Launched Version: Fabric
+	Backend library: LWJGL version 3.3.3-snapshot
+	Backend API: Mesa Intel(R) HD Graphics 4600 (HSW GT2) GL version 4.6 (Core Profile) Mesa 22.3.6, Intel
+	Window size: <not initialized>
+	GFLW Platform: x11
+	Render Extensions: GL_ARB_buffer_storage, GL_KHR_debug, GL_ARB_vertex_attrib_binding, GL_ARB_direct_state_access, GL_EXT_texture_filter_anisotropic
+	GL debug messages: 
+	Is Modded: Definitely; Client brand changed to 'fabric'
+	Universe: 404
+	Type: Client (map_client.txt)
+	Locale: ru_RU
+	System encoding: UTF-8
+	File encoding: UTF-8
+	CPU: 8x Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz

@@ -1,0 +1,37 @@
+{
+  "Player": {
+    "x": 30,
+    "y": 50,
+    "hidden": true
+  },
+  "Render": {
+    "x": 30,
+    "y": 66,
+    "hidden": true
+  },
+  "Combat": {
+    "x": 130,
+    "y": 56,
+    "hidden": false
+  },
+  "Movement": {
+    "x": 154,
+    "y": 35,
+    "hidden": true
+  },
+  "Exploits": {
+    "x": 30,
+    "y": 114,
+    "hidden": true
+  },
+  "Misc": {
+    "x": 30,
+    "y": 131,
+    "hidden": true
+  },
+  "World": {
+    "x": 30,
+    "y": 146,
+    "hidden": true
+  }
+}

@@ -1,0 +1,130 @@
+---- Minecraft Crash Report ----
+// Surprise! Haha. Well, this is awkward.
+
+Time: 2026-10-24 18:23:45
+Description: Rendering screen
+
+java.lang.IllegalStateException: Can only blur once per frame
+	at knot//net.minecraft.client.gui.render.state.GuiRenderState.applyBlur(GuiRenderState.java:44)
+	at knot//net.minecraft.client.gui.DrawContext.applyBlur(DrawContext.java:143)
+	at knot//net.minecraft.client.gui.screen.Screen.applyBlur(Screen.java:390)
+	at knot//net.minecraft.client.gui.screen.Screen.renderBackground(Screen.java:380)
+	at knot//org.bleachhack.gui.ProtocolScreen.render(ProtocolScreen.java:77)
+	at knot//net.minecraft.client.gui.screen.Screen.renderWithTooltip(Screen.java:119)
+	at knot//net.minecraft.client.render.GameRenderer.render(GameRenderer.java:537)
+	at knot//net.minecraft.client.MinecraftClient.render(MinecraftClient.java:1393)
+	at knot//net.minecraft.client.MinecraftClient.run(MinecraftClient.java:966)
+	at knot//net.minecraft.client.main.Main.main(Main.java:250)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at knot//net.minecraft.client.gui.render.state.GuiRenderState.applyBlur(GuiRenderState.java:44)
+	at knot//net.minecraft.client.gui.DrawContext.applyBlur(DrawContext.java:143)
+	at knot//net.minecraft.client.gui.screen.Screen.applyBlur(Screen.java:390)
+	at knot//net.minecraft.client.gui.screen.Screen.renderBackground(Screen.java:380)
+	at knot//org.bleachhack.gui.ProtocolScreen.render(ProtocolScreen.java:77)
+	at knot//net.minecraft.client.gui.screen.Screen.renderWithTooltip(Screen.java:119)
+
+-- Screen render details --
+Details:
+	Screen name: org.bleachhack.gui.ProtocolScreen
+	Mouse location: Scaled: (35.500000, 16.500000). Absolute: (71.000000, 33.000000)
+	Screen size: Scaled: (427, 240). Absolute: (854, 480). Scale factor of 2
+Stacktrace:
+	at knot//net.minecraft.client.render.GameRenderer.render(GameRenderer.java:537)
+	at knot//net.minecraft.client.MinecraftClient.render(MinecraftClient.java:1393)
+	at knot//net.minecraft.client.MinecraftClient.run(MinecraftClient.java:966)
+	at knot//net.minecraft.client.main.Main.main(Main.java:250)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+
+-- Uptime --
+Details:
+	JVM uptime: 107.428s
+	Wall uptime: 97.658s
+	High-res time: 97.031s
+	Client ticks: 1883 ticks / 94.150s
+Stacktrace:
+	at knot//net.minecraft.client.MinecraftClient.addDetailsToCrashReport(MinecraftClient.java:2477)
+	at knot//net.minecraft.client.MinecraftClient.printCrashReport(MinecraftClient.java:1035)
+	at knot//net.minecraft.client.MinecraftClient.run(MinecraftClient.java:987)
+	at knot//net.minecraft.client.main.Main.main(Main.java:250)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+
+-- Last reload --
+Details:
+	Reload number: 1
+	Reload reason: initial
+	Finished: Yes
+	Packs: vanilla
+
+-- System Details --
+Details:
+	Minecraft Version: 1.21.11
+	Minecraft Version ID: 1.21.11
+	Operating System: Linux (amd64) version 6.1.0-53-amd64
+	Java Version: 21.0.12.1, Eclipse Adoptium
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Eclipse Adoptium
+	Memory: 84061752 bytes (80 MiB) / 527433728 bytes (503 MiB) up to 2061500416 bytes (1966 MiB)
+	CPUs: 8
+	Processor Vendor: GenuineIntel
+	Processor Name: Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz
+	Identifier: Intel64 Family 6 Model 60 Stepping 3
+	Microarchitecture: Haswell (Client)
+	Frequency (GHz): 2.60
+	Number of physical packages: 1
+	Number of physical CPUs: 4
+	Number of logical CPUs: 8
+	Graphics card #0 name: 4th Gen Core Processor Integrated Graphics Controller
+	Graphics card #0 vendor: Intel Corporation (0x8086)
+	Graphics card #0 VRAM (MiB): 256.00
+	Graphics card #0 deviceId: 0x0416
+	Graphics card #0 versionInfo: unknown
+	Graphics card #1 name: GM107M [GeForce GTX 960M]
+	Graphics card #1 vendor: NVIDIA Corporation (0x10de)
+	Graphics card #1 VRAM (MiB): 288.00
+	Graphics card #1 deviceId: 0x139b
+	Graphics card #1 versionInfo: unknown
+	Virtual memory max (MiB): 4907.32
+	Virtual memory used (MiB): 5444.84
+	Swap memory total (MiB): 976.00
+	Swap memory used (MiB): 30.25
+	Space in storage for jna.tmpdir (MiB): <path not set>
+	Space in storage for org.lwjgl.system.SharedLibraryExtractPath (MiB): <path not set>
+	Space in storage for io.netty.native.workdir (MiB): <path not set>
+	Space in storage for java.io.tmpdir (MiB): available: 346465.91, total: 478159.00
+	Space in storage for workdir (MiB): available: 346465.91, total: 478159.00
+	JVM Flags: 1 total; -XX:StackShadowPages=32
+	Debug Flags: 0 total; 
+	Launched Version: Fabric
+	Backend library: LWJGL version 3.3.3-snapshot
+	Backend API: Mesa Intel(R) HD Graphics 4600 (HSW GT2) GL version 4.6 (Core Profile) Mesa 22.3.6, Intel
+	Window size: 854x480
+	GFLW Platform: x11
+	Render Extensions: GL_ARB_buffer_storage, GL_KHR_debug, GL_ARB_vertex_attrib_binding, GL_ARB_direct_state_access, GL_EXT_texture_filter_anisotropic
+	GL debug messages: 
+	Is Modded: Definitely; Client brand changed to 'fabric'
+	Universe: 400921fb54442d18
+	Type: Client (map_client.txt)
+	Transparency: regular
+	Render Distance: 16/16 chunks
+	Resource Packs: vanilla
+	Current Language: en_us
+	Locale: ru_RU
+	System encoding: UTF-8
+	File encoding: UTF-8
+	CPU: 8x Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz

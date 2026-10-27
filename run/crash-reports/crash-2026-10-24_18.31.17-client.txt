@@ -1,0 +1,196 @@
+---- Minecraft Crash Report ----
+// I blame Dinnerbone.
+
+Time: 2026-10-24 18:31:17
+Description: Ticking entity
+
+java.lang.RuntimeException: Mixin transformation of net.minecraft.world.BlockCollisionSpliterator failed
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:441)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.tryLoadClass(KnotClassDelegate.java:337)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.loadClass(KnotClassDelegate.java:232)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassLoader.loadClass(KnotClassLoader.java:119)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	at knot//net.minecraft.world.CollisionView.method_71397(CollisionView.java:106)
+	at knot//net.minecraft.world.CollisionView.isBlockSpaceEmpty(CollisionView.java:63)
+	at knot//net.minecraft.world.CollisionView.isSpaceEmpty(CollisionView.java:54)
+	at knot//net.minecraft.world.CollisionView.isSpaceEmpty(CollisionView.java:49)
+	at knot//net.minecraft.entity.player.PlayerEntity.canChangeIntoPose(PlayerEntity.java:429)
+	at knot//net.minecraft.client.network.ClientPlayerEntity.tickMovement(ClientPlayerEntity.java:781)
+	at knot//net.minecraft.entity.LivingEntity.tick(LivingEntity.java:2818)
+	at knot//net.minecraft.entity.player.PlayerEntity.tick(PlayerEntity.java:288)
+	at knot//net.minecraft.client.network.AbstractClientPlayerEntity.tick(AbstractClientPlayerEntity.java:56)
+	at knot//net.minecraft.client.network.ClientPlayerEntity.tick(ClientPlayerEntity.java:236)
+	at knot//net.minecraft.client.world.ClientWorld.tickEntity(ClientWorld.java:347)
+	at knot//net.minecraft.world.World.tickEntity(World.java:490)
+	at knot//net.minecraft.client.world.ClientWorld.method_32124(ClientWorld.java:329)
+	at knot//net.minecraft.world.EntityList.forEach(EntityList.java:53)
+	at knot//net.minecraft.client.world.ClientWorld.tickEntities(ClientWorld.java:325)
+	at knot//net.minecraft.client.MinecraftClient.tick(MinecraftClient.java:1937)
+	at knot//net.minecraft.client.MinecraftClient.render(MinecraftClient.java:1354)
+	at knot//net.minecraft.client.MinecraftClient.run(MinecraftClient.java:966)
+	at knot//net.minecraft.client.main.Main.main(Main.java:250)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+Caused by: org.spongepowered.asm.mixin.transformer.throwables.MixinTransformerError: An unexpected critical error was encountered
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:380)
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClass(MixinTransformer.java:237)
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClassBytes(MixinTransformer.java:202)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:436)
+	... 27 more
+Caused by: org.spongepowered.asm.mixin.injection.throwables.InjectionError: Critical injection failure: Redirector computeNext_getCollisionShape(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape; in bleachhack.mixins.json:MixinBlockCollisionSpliterator from mod bleachhack failed injection check, (0/1) succeeded. Scanned 0 target(s). No refMap loaded.
+	at org.spongepowered.asm.mixin.injection.struct.InjectionInfo.postInject(InjectionInfo.java:526)
+	at org.spongepowered.asm.mixin.transformer.MixinTargetContext.applyInjections(MixinTargetContext.java:1482)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.applyInjections(MixinApplicatorStandard.java:832)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.lambda$runApplicatorPass$7(MixinApplicatorStandard.java:362)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.processMixins(MixinApplicatorStandard.java:381)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.runApplicatorPass(MixinApplicatorStandard.java:360)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.apply(MixinApplicatorStandard.java:240)
+	at org.spongepowered.asm.mixin.transformer.TargetClassContext.apply(TargetClassContext.java:437)
+	at org.spongepowered.asm.mixin.transformer.TargetClassContext.applyMixins(TargetClassContext.java:418)
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:351)
+	... 30 more
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:441)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.tryLoadClass(KnotClassDelegate.java:337)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.loadClass(KnotClassDelegate.java:232)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassLoader.loadClass(KnotClassLoader.java:119)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	at knot//net.minecraft.world.CollisionView.method_71397(CollisionView.java:106)
+	at knot//net.minecraft.world.CollisionView.isBlockSpaceEmpty(CollisionView.java:63)
+	at knot//net.minecraft.world.CollisionView.isSpaceEmpty(CollisionView.java:54)
+	at knot//net.minecraft.world.CollisionView.isSpaceEmpty(CollisionView.java:49)
+	at knot//net.minecraft.entity.player.PlayerEntity.canChangeIntoPose(PlayerEntity.java:429)
+	at knot//net.minecraft.client.network.ClientPlayerEntity.tickMovement(ClientPlayerEntity.java:781)
+	at knot//net.minecraft.entity.LivingEntity.tick(LivingEntity.java:2818)
+	at knot//net.minecraft.entity.player.PlayerEntity.tick(PlayerEntity.java:288)
+	at knot//net.minecraft.client.network.AbstractClientPlayerEntity.tick(AbstractClientPlayerEntity.java:56)
+	at knot//net.minecraft.client.network.ClientPlayerEntity.tick(ClientPlayerEntity.java:236)
+	at knot//net.minecraft.client.world.ClientWorld.tickEntity(ClientWorld.java:347)
+	at knot//net.minecraft.world.World.tickEntity(World.java:490)
+	at knot//net.minecraft.client.world.ClientWorld.method_32124(ClientWorld.java:329)
+	at knot//net.minecraft.world.EntityList.forEach(EntityList.java:53)
+	at knot//net.minecraft.client.world.ClientWorld.tickEntities(ClientWorld.java:325)
+
+-- Entity being ticked --
+Details:
+	Entity Type: minecraft:player (net.minecraft.client.network.ClientPlayerEntity)
+	Entity ID: 1
+	Entity Name: Player36
+	Entity's Exact location: 0.00, 256.00, 0.00
+	Entity's Block location: World: (0,256,0), Section: (at 0,0,0 in 0,16,0; chunk contains blocks 0,0,0 to 15,255,15), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,0,0 to 511,255,511)
+	Entity's Momentum: 0.00, 0.00, 0.00
+	Entity's Passengers: []
+	Entity's Vehicle: null
+Stacktrace:
+	at knot//net.minecraft.world.World.tickEntity(World.java:490)
+	at knot//net.minecraft.client.world.ClientWorld.method_32124(ClientWorld.java:329)
+	at knot//net.minecraft.world.EntityList.forEach(EntityList.java:53)
+	at knot//net.minecraft.client.world.ClientWorld.tickEntities(ClientWorld.java:325)
+	at knot//net.minecraft.client.MinecraftClient.tick(MinecraftClient.java:1937)
+	at knot//net.minecraft.client.MinecraftClient.render(MinecraftClient.java:1354)
+	at knot//net.minecraft.client.MinecraftClient.run(MinecraftClient.java:966)
+	at knot//net.minecraft.client.main.Main.main(Main.java:250)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+
+-- Uptime --
+Details:
+	JVM uptime: 50.918s
+	Wall uptime: 40.221s
+	High-res time: 39.521s
+	Client ticks: 724 ticks / 36.200s
+Stacktrace:
+	at knot//net.minecraft.client.MinecraftClient.addDetailsToCrashReport(MinecraftClient.java:2477)
+	at knot//net.minecraft.client.MinecraftClient.printCrashReport(MinecraftClient.java:1035)
+	at knot//net.minecraft.client.MinecraftClient.run(MinecraftClient.java:987)
+	at knot//net.minecraft.client.main.Main.main(Main.java:250)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+
+-- Affected level --
+Details:
+	All players: 1 total; ClientPlayerEntity{name=Player36, id=1, pos=(0.0, 256.0, 0.0), mode=ADVENTURE, permission=net.minecraft.command.permission.PermissionPredicate$$Lambda/0x00007f5505235340@4ede4622}
+	Chunk stats: 729, 9
+	Level dimension: minecraft:overworld
+	Level spawn location: World: (0,256,0), Section: (at 0,0,0 in 0,16,0; chunk contains blocks 0,0,0 to 15,255,15), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,0,0 to 511,255,511)
+	Level time: 1000 game time, 1000 day time
+	Server brand: LimboAPI (1.1.27-SNAPSHOT (git-bfef579)) -> ReallyWorld
+	Server type: Non-integrated multiplayer server
+	Tracked entity count: 1
+
+-- Last reload --
+Details:
+	Reload number: 1
+	Reload reason: initial
+	Finished: Yes
+	Packs: vanilla
+
+-- System Details --
+Details:
+	Minecraft Version: 1.21.11
+	Minecraft Version ID: 1.21.11
+	Operating System: Linux (amd64) version 6.1.0-53-amd64
+	Java Version: 21.0.12.1, Eclipse Adoptium
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Eclipse Adoptium
+	Memory: 89666888 bytes (85 MiB) / 468713472 bytes (447 MiB) up to 2061500416 bytes (1966 MiB)
+	CPUs: 8
+	Processor Vendor: GenuineIntel
+	Processor Name: Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz
+	Identifier: Intel64 Family 6 Model 60 Stepping 3
+	Microarchitecture: Haswell (Client)
+	Frequency (GHz): 2.60
+	Number of physical packages: 1
+	Number of physical CPUs: 4
+	Number of logical CPUs: 8
+	Graphics card #0 name: 4th Gen Core Processor Integrated Graphics Controller
+	Graphics card #0 vendor: Intel Corporation (0x8086)
+	Graphics card #0 VRAM (MiB): 256.00
+	Graphics card #0 deviceId: 0x0416
+	Graphics card #0 versionInfo: unknown
+	Graphics card #1 name: GM107M [GeForce GTX 960M]
+	Graphics card #1 vendor: NVIDIA Corporation (0x10de)
+	Graphics card #1 VRAM (MiB): 288.00
+	Graphics card #1 deviceId: 0x139b
+	Graphics card #1 versionInfo: unknown
+	Virtual memory max (MiB): 4907.32
+	Virtual memory used (MiB): 5469.32
+	Swap memory total (MiB): 976.00
+	Swap memory used (MiB): 32.75
+	Space in storage for jna.tmpdir (MiB): <path not set>
+	Space in storage for org.lwjgl.system.SharedLibraryExtractPath (MiB): <path not set>
+	Space in storage for io.netty.native.workdir (MiB): <path not set>
+	Space in storage for java.io.tmpdir (MiB): available: 346464.25, total: 478159.00
+	Space in storage for workdir (MiB): available: 346464.25, total: 478159.00
+	JVM Flags: 1 total; -XX:StackShadowPages=32
+	Debug Flags: 0 total; 
+	Launched Version: Fabric
+	Backend library: LWJGL version 3.3.3-snapshot
+	Backend API: Mesa Intel(R) HD Graphics 4600 (HSW GT2) GL version 4.6 (Core Profile) Mesa 22.3.6, Intel
+	Window size: 854x480
+	GFLW Platform: x11
+	Render Extensions: GL_ARB_buffer_storage, GL_KHR_debug, GL_ARB_vertex_attrib_binding, GL_ARB_direct_state_access, GL_EXT_texture_filter_anisotropic
+	GL debug messages: 
+	Is Modded: Definitely; Client brand changed to 'fabric'
+	Universe: 400921fb54442d18
+	Type: Client (map_client.txt)
+	Transparency: regular
+	Render Distance: 10/16 chunks
+	Resource Packs: vanilla
+	Current Language: en_us
+	Locale: ru_RU
+	System encoding: UTF-8
+	File encoding: UTF-8
+	CPU: 8x Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz

@@ -1,0 +1,123 @@
+---- Minecraft Network Protocol Error Report ----
+// Too many suspicious packets
+
+Time: 2026-10-24 17:33:57
+Description: Packet handling error
+
+java.nio.channels.ClosedChannelException
+	at knot//io.netty.channel.local.LocalChannel.doWrite(LocalChannel.java:393)
+	at knot//io.netty.channel.AbstractChannel$AbstractUnsafe.flush0(AbstractChannel.java:802)
+	at knot//io.netty.channel.AbstractChannel$AbstractUnsafe.flush(AbstractChannel.java:766)
+	at knot//io.netty.channel.DefaultChannelPipeline$HeadContext.flush(DefaultChannelPipeline.java:1391)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.invokeFlush0(AbstractChannelHandlerContext.java:789)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.invokeFlush(AbstractChannelHandlerContext.java:775)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.flush(AbstractChannelHandlerContext.java:761)
+	at knot//io.netty.channel.ChannelOutboundHandlerAdapter.flush(ChannelOutboundHandlerAdapter.java:125)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.invokeFlush0(AbstractChannelHandlerContext.java:793)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:835)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.writeAndFlush(AbstractChannelHandlerContext.java:804)
+	at knot//io.netty.channel.DefaultChannelPipeline.writeAndFlush(DefaultChannelPipeline.java:1041)
+	at knot//io.netty.channel.Channel.writeAndFlush(Channel.java:262)
+	at knot//net.minecraft.network.ClientConnection.sendInternal(ClientConnection.java:328)
+	at knot//net.minecraft.network.ClientConnection.method_52917(ClientConnection.java:318)
+	at knot//io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:148)
+	at knot//io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:141)
+	at knot//io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:535)
+	at knot//io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:201)
+	at knot//io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1193)
+	at knot//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Netty Local IO #1
+Stacktrace:
+	at knot//net.minecraft.network.listener.PacketListener.fillCrashReport(PacketListener.java:33)
+
+-- Connection --
+Details:
+	Protocol: play
+	Flow: CLIENTBOUND
+	Is Local: true
+	Server type: <none>
+	Server brand: fabric
+Stacktrace:
+	at knot//net.minecraft.network.listener.PacketListener.fillCrashReport(PacketListener.java:33)
+	at knot//net.minecraft.network.NetworkThreadUtils.fillCrashReport(NetworkThreadUtils.java:47)
+	at knot//net.minecraft.client.network.ClientCommonNetworkHandler.savePacketErrorReport(ClientCommonNetworkHandler.java:146)
+	at knot//net.minecraft.client.network.ClientCommonNetworkHandler.createDisconnectionInfo(ClientCommonNetworkHandler.java:137)
+	at knot//net.minecraft.network.ClientConnection.exceptionCaught(ClientConnection.java:134)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.invokeExceptionCaught(AbstractChannelHandlerContext.java:289)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.fireExceptionCaught(AbstractChannelHandlerContext.java:271)
+	at knot//io.netty.channel.DefaultChannelPipeline$HeadContext.exceptionCaught(DefaultChannelPipeline.java:1396)
+	at knot//io.netty.channel.DefaultChannelPipeline.fireExceptionCaught(DefaultChannelPipeline.java:890)
+	at knot//io.netty.channel.VoidChannelPromise.fireException0(VoidChannelPromise.java:236)
+	at knot//io.netty.channel.VoidChannelPromise.tryFailure(VoidChannelPromise.java:178)
+	at knot//io.netty.util.internal.PromiseNotificationUtil.tryFailure(PromiseNotificationUtil.java:64)
+	at knot//io.netty.channel.ChannelOutboundBuffer.safeFail(ChannelOutboundBuffer.java:753)
+	at knot//io.netty.channel.ChannelOutboundBuffer.remove0(ChannelOutboundBuffer.java:338)
+	at knot//io.netty.channel.ChannelOutboundBuffer.remove(ChannelOutboundBuffer.java:318)
+	at knot//io.netty.channel.local.LocalChannel.doWrite(LocalChannel.java:395)
+	at knot//io.netty.channel.AbstractChannel$AbstractUnsafe.flush0(AbstractChannel.java:802)
+	at knot//io.netty.channel.AbstractChannel$AbstractUnsafe.flush(AbstractChannel.java:766)
+	at knot//io.netty.channel.DefaultChannelPipeline$HeadContext.flush(DefaultChannelPipeline.java:1391)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.invokeFlush0(AbstractChannelHandlerContext.java:789)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.invokeFlush(AbstractChannelHandlerContext.java:775)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.flush(AbstractChannelHandlerContext.java:761)
+	at knot//io.netty.channel.ChannelOutboundHandlerAdapter.flush(ChannelOutboundHandlerAdapter.java:125)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.invokeFlush0(AbstractChannelHandlerContext.java:793)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:835)
+	at knot//io.netty.channel.AbstractChannelHandlerContext.writeAndFlush(AbstractChannelHandlerContext.java:804)
+	at knot//io.netty.channel.DefaultChannelPipeline.writeAndFlush(DefaultChannelPipeline.java:1041)
+	at knot//io.netty.channel.Channel.writeAndFlush(Channel.java:262)
+	at knot//net.minecraft.network.ClientConnection.sendInternal(ClientConnection.java:328)
+	at knot//net.minecraft.network.ClientConnection.method_52917(ClientConnection.java:318)
+	at knot//io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:148)
+	at knot//io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:141)
+	at knot//io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:535)
+	at knot//io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:201)
+	at knot//io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1193)
+	at knot//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.21.11
+	Minecraft Version ID: 1.21.11
+	Operating System: Linux (amd64) version 6.1.0-53-amd64
+	Java Version: 21.0.12.1, Eclipse Adoptium
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Eclipse Adoptium
+	Memory: 38643032 bytes (36 MiB) / 730857472 bytes (697 MiB) up to 2061500416 bytes (1966 MiB)
+	CPUs: 8
+	Processor Vendor: GenuineIntel
+	Processor Name: Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz
+	Identifier: Intel64 Family 6 Model 60 Stepping 3
+	Microarchitecture: Haswell (Client)
+	Frequency (GHz): 2.60
+	Number of physical packages: 1
+	Number of physical CPUs: 4
+	Number of logical CPUs: 8
+	Graphics card #0 name: 4th Gen Core Processor Integrated Graphics Controller
+	Graphics card #0 vendor: Intel Corporation (0x8086)
+	Graphics card #0 VRAM (MiB): 256.00
+	Graphics card #0 deviceId: 0x0416
+	Graphics card #0 versionInfo: unknown
+	Graphics card #1 name: GM107M [GeForce GTX 960M]
+	Graphics card #1 vendor: NVIDIA Corporation (0x10de)
+	Graphics card #1 VRAM (MiB): 288.00
+	Graphics card #1 deviceId: 0x139b
+	Graphics card #1 versionInfo: unknown
+	Virtual memory max (MiB): 4907.32
+	Virtual memory used (MiB): 8353.56
+	Swap memory total (MiB): 976.00
+	Swap memory used (MiB): 976.00
+	Space in storage for jna.tmpdir (MiB): <path not set>
+	Space in storage for org.lwjgl.system.SharedLibraryExtractPath (MiB): <path not set>
+	Space in storage for io.netty.native.workdir (MiB): <path not set>
+	Space in storage for java.io.tmpdir (MiB): available: 329289.34, total: 478159.00
+	Space in storage for workdir (MiB): available: 329289.34, total: 478159.00
+	JVM Flags: 1 total; -XX:StackShadowPages=32
+	Debug Flags: 0 total; 

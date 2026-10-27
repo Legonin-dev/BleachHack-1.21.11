@@ -1,0 +1,121 @@
+---- Minecraft Crash Report ----
+// I bet Cylons wouldn't have this problem.
+
+Time: 2026-10-24 18:13:36
+Description: Bootstrap
+
+java.lang.ExceptionInInitializerError
+	at knot//net.minecraft.client.render.TexturedRenderLayers.<clinit>(TexturedRenderLayers.java:42)
+	at knot//net.minecraft.client.render.item.model.special.BedModelRenderer$Unbaked.<init>(BedModelRenderer.java:32)
+	at knot//net.minecraft.client.render.item.model.special.SpecialModelTypes.<clinit>(SpecialModelTypes.java:91)
+	at knot//net.minecraft.client.render.item.model.SpecialItemModel$Unbaked.method_65636(SpecialItemModel.java:64)
+	at knot//com.mojang.serialization.codecs.RecordCodecBuilder.mapCodec(RecordCodecBuilder.java:76)
+	at knot//net.minecraft.client.render.item.model.SpecialItemModel$Unbaked.<clinit>(SpecialItemModel.java:63)
+	at knot//net.minecraft.client.render.item.model.ItemModelTypes.bootstrap(ItemModelTypes.java:17)
+	at knot//net.minecraft.client.ClientBootstrap.initialize(ClientBootstrap.java:23)
+	at knot//net.minecraft.client.main.Main.main(Main.java:136)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+Caused by: java.lang.RuntimeException: Mixin transformation of org.bleachhack.mixin.BlockEntityRenderStateAccess failed
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:441)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.tryLoadClass(KnotClassDelegate.java:337)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.loadClass(KnotClassDelegate.java:232)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassLoader.loadClass(KnotClassLoader.java:119)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	at java.base/java.lang.ClassLoader.defineClass1(Native Method)
+	at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1027)
+	at java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:150)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassLoader.defineClassFwd(KnotClassLoader.java:165)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.tryLoadClass(KnotClassDelegate.java:369)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.loadClass(KnotClassDelegate.java:232)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassLoader.loadClass(KnotClassLoader.java:119)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	at knot//net.minecraft.client.render.RenderLayers.<clinit>(RenderLayers.java:589)
+	... 13 more
+Caused by: org.spongepowered.asm.mixin.transformer.throwables.IllegalClassLoadError: org.bleachhack.mixin.BlockEntityRenderStateAccess is in a defined mixin package org.bleachhack.mixin.* owned by bleachhack.mixins.json and cannot be referenced directly
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:322)
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClass(MixinTransformer.java:237)
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClassBytes(MixinTransformer.java:202)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:436)
+	... 26 more
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: main
+Stacktrace:
+	at knot//net.minecraft.client.render.TexturedRenderLayers.<clinit>(TexturedRenderLayers.java:42)
+	at knot//net.minecraft.client.render.item.model.special.BedModelRenderer$Unbaked.<init>(BedModelRenderer.java:32)
+	at knot//net.minecraft.client.render.item.model.special.SpecialModelTypes.<clinit>(SpecialModelTypes.java:91)
+	at knot//net.minecraft.client.render.item.model.SpecialItemModel$Unbaked.method_65636(SpecialItemModel.java:64)
+	at knot//com.mojang.serialization.codecs.RecordCodecBuilder.mapCodec(RecordCodecBuilder.java:76)
+	at knot//net.minecraft.client.render.item.model.SpecialItemModel$Unbaked.<clinit>(SpecialItemModel.java:63)
+	at knot//net.minecraft.client.render.item.model.ItemModelTypes.bootstrap(ItemModelTypes.java:17)
+	at knot//net.minecraft.client.ClientBootstrap.initialize(ClientBootstrap.java:23)
+
+-- Initialization --
+Details:
+	Modules: 
+Stacktrace:
+	at knot//net.minecraft.client.main.Main.main(Main.java:136)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.21.11
+	Minecraft Version ID: 1.21.11
+	Operating System: Linux (amd64) version 6.1.0-53-amd64
+	Java Version: 21.0.12.1, Eclipse Adoptium
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Eclipse Adoptium
+	Memory: 178575288 bytes (170 MiB) / 393216000 bytes (375 MiB) up to 2061500416 bytes (1966 MiB)
+	CPUs: 8
+	Processor Vendor: GenuineIntel
+	Processor Name: Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz
+	Identifier: Intel64 Family 6 Model 60 Stepping 3
+	Microarchitecture: Haswell (Client)
+	Frequency (GHz): 2.60
+	Number of physical packages: 1
+	Number of physical CPUs: 4
+	Number of logical CPUs: 8
+	Graphics card #0 name: 4th Gen Core Processor Integrated Graphics Controller
+	Graphics card #0 vendor: Intel Corporation (0x8086)
+	Graphics card #0 VRAM (MiB): 256.00
+	Graphics card #0 deviceId: 0x0416
+	Graphics card #0 versionInfo: unknown
+	Graphics card #1 name: GM107M [GeForce GTX 960M]
+	Graphics card #1 vendor: NVIDIA Corporation (0x10de)
+	Graphics card #1 VRAM (MiB): 288.00
+	Graphics card #1 deviceId: 0x139b
+	Graphics card #1 versionInfo: unknown
+	Virtual memory max (MiB): 4907.32
+	Virtual memory used (MiB): 4874.63
+	Swap memory total (MiB): 976.00
+	Swap memory used (MiB): 5.00
+	Space in storage for jna.tmpdir (MiB): <path not set>
+	Space in storage for org.lwjgl.system.SharedLibraryExtractPath (MiB): <path not set>
+	Space in storage for io.netty.native.workdir (MiB): <path not set>
+	Space in storage for java.io.tmpdir (MiB): available: 346473.00, total: 478159.00
+	Space in storage for workdir (MiB): available: 346473.00, total: 478159.00
+	JVM Flags: 1 total; -XX:StackShadowPages=32
+	Debug Flags: 0 total; 
+	Launched Version: Fabric
+	Backend library: LWJGL version 3.3.3-snapshot
+	Backend API: Unknown
+	Window size: <not initialized>
+	GFLW Platform: <error>
+	Render Extensions: ERR
+	GL debug messages: <no renderer available>
+	Is Modded: Definitely; Client brand changed to 'fabric'
+	Universe: 404
+	Type: Client (map_client.txt)
+	Locale: ru_RU
+	System encoding: UTF-8
+	File encoding: UTF-8
+	CPU: 8x Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz

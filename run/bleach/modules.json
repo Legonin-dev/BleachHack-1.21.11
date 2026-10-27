@@ -1,0 +1,516 @@
+{
+  "AirPlace": {
+    "settings": {
+      "Highlight": {
+        "toggled": true,
+        "children": {
+          "Render": 0,
+          "Box": 2.0,
+          "Fill": 0.3,
+          "Color": [
+            0.0,
+            0.0,
+            0.5019608
+          ]
+        }
+      }
+    }
+  },
+  "Ambience": {
+    "settings": {
+      "Nether": {
+        "toggled": true,
+        "children": {
+          "Sky Color": {
+            "toggled": true,
+            "children": {
+              "End Skybox": false,
+              "Sky Color": [
+                0.33333334,
+                0.4980392,
+                1.0
+              ]
+            }
+          },
+          "Foilage Color": {
+            "toggled": false,
+            "children": {
+              "Color": [
+                0.33333334,
+                0.4980392,
+                1.0
+              ]
+            }
+          },
+          "Water Color": {
+            "toggled": false,
+            "children": {
+              "Color": [
+                0.33333334,
+                0.4980392,
+                1.0
+              ]
+            }
+          }
+        }
+      },
+      "Overworld": {
+        "toggled": true,
+        "children": {
+          "Sky Color": {
+            "toggled": true,
+            "children": {
+              "End Skybox": false,
+              "Sky Color": [
+                0.33333334,
+                0.4980392,
+                1.0
+              ]
+            }
+          },
+          "Foilage Color": {
+            "toggled": false,
+            "children": {
+              "Color": [
+                0.33333334,
+                0.4980392,
+                1.0
+              ]
+            }
+          },
+          "Water Color": {
+            "toggled": false,
+            "children": {
+              "Color": [
+                0.33333334,
+                0.4980392,
+                1.0
+              ]
+            }
+          }
+        }
+      },
+      "End": {
+        "toggled": true,
+        "children": {
+          "Sky Color": {
+            "toggled": true,
+            "children": {
+              "End Skybox": false,
+              "Sky Color": [
+                0.33333334,
+                0.4980392,
+                1.0
+              ]
+            }
+          },
+          "Foilage Color": {
+            "toggled": false,
+            "children": {
+              "Color": [
+                0.33333334,
+                0.4980392,
+                1.0
+              ]
+            }
+          },
+          "Water Color": {
+            "toggled": false,
+            "children": {
+              "Color": [
+                0.33333334,
+                0.4980392,
+                1.0
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "AutoParkour": {
+    "settings": {
+      "Smart": {
+        "toggled": true,
+        "children": {
+          "Snap": false,
+          "Highlight": {
+            "toggled": false,
+            "children": {
+              "Color": [
+                0.9444444,
+                0.4883721,
+                0.84313726
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "BlockHighlight": {
+    "settings": {
+      "Color": [
+        0.5,
+        1.0,
+        0.5019608
+      ]
+    }
+  },
+  "ClickTp": {
+    "settings": {
+      "Highlight": [
+        0.7533334,
+        0.75,
+        0.78431374
+      ]
+    }
+  },
+  "CrystalAura": {
+    "settings": {
+      "Place": {
+        "toggled": true,
+        "children": {
+          "AutoSwitch": {
+            "toggled": true,
+            "children": {
+              "SwitchBack": true
+            }
+          },
+          "1.12 Place": false,
+          "Blacklist": true,
+          "Raycast": false,
+          "MinDmg": 2.0,
+          "MinRatio": 2.0,
+          "CPT": 2.0,
+          "Cooldown": 0.0,
+          "Place Color": [
+            0.6666667,
+            0.30196077,
+            1.0
+          ]
+        }
+      }
+    }
+  },
+  "DiscordRPC": {
+    "toggled": false
+  },
+  "ESP": {
+    "settings": {
+      "Animals": {
+        "toggled": false,
+        "children": {
+          "Color": [
+            0.33333334,
+            0.7058823,
+            1.0
+          ]
+        }
+      },
+      "Armorstands": {
+        "toggled": false,
+        "children": {
+          "Color": [
+            0.15151516,
+            0.6875,
+            0.627451
+          ]
+        }
+      },
+      "Mobs": {
+        "toggled": false,
+        "children": {
+          "Color": [
+            0.8333333,
+            0.8046875,
+            0.5019608
+          ]
+        }
+      },
+      "Crystals": {
+        "toggled": true,
+        "children": {
+          "Color": [
+            0.8333333,
+            0.8039216,
+            1.0
+          ]
+        }
+      },
+      "Items": {
+        "toggled": true,
+        "children": {
+          "Color": [
+            0.12195122,
+            0.8039216,
+            1.0
+          ]
+        }
+      },
+      "Players": {
+        "toggled": true,
+        "children": {
+          "Player Color": [
+            0.0,
+            0.7058823,
+            1.0
+          ],
+          "Friend Color": [
+            0.5,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "Vehicles": {
+        "toggled": false,
+        "children": {
+          "Color": [
+            0.0,
+            0.0,
+            0.5882353
+          ]
+        }
+      }
+    }
+  },
+  "HoleESP": {
+    "settings": {
+      "Mixed": {
+        "toggled": true,
+        "children": {
+          "Mixed": [
+            0.16666667,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "Obsidian": {
+        "toggled": true,
+        "children": {
+          "Obsidian": [
+            0.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "Bedrock": {
+        "toggled": true,
+        "children": {
+          "Color": [
+            0.33333334,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    }
+  },
+  "Killaura": {
+    "toggled": true,
+    "settings": {
+      "Animals": true
+    }
+  },
+  "LiquidFiller": {
+    "settings": {
+      "Highlight": {
+        "toggled": true,
+        "children": {
+          "Opacity": 0.3,
+          "Water Color": [
+            0.58300656,
+            1.0,
+            1.0
+          ],
+          "Lava Color": [
+            0.12418301,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    }
+  },
+  "NewChunks": {
+    "settings": {
+      "OldChunks": {
+        "toggled": false,
+        "children": {
+          "Color": [
+            0.0,
+            0.7826087,
+            0.9019608
+          ]
+        }
+      },
+      "NewChunks": {
+        "toggled": true,
+        "children": {
+          "Color": [
+            0.79487175,
+            0.30232555,
+            0.84313726
+          ]
+        }
+      }
+    }
+  },
+  "Nuker": {
+    "settings": {
+      "Highlight": {
+        "toggled": false,
+        "children": {
+          "Mode": 0,
+          "Color": [
+            0.0,
+            0.4980392,
+            1.0
+          ]
+        }
+      },
+      "RangeHighlight": {
+        "toggled": false,
+        "children": {
+          "Width": 3.0,
+          "Color": [
+            0.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    }
+  },
+  "SafeWalk": {
+    "toggled": true
+  },
+  "Scaffold": {
+    "settings": {
+      "Highlight": {
+        "toggled": false,
+        "children": {
+          "Color": [
+            0.11382115,
+            0.8039216,
+            1.0
+          ],
+          "Placed": false
+        }
+      }
+    }
+  },
+  "Speed": {
+    "toggled": true
+  },
+  "Tracers": {
+    "settings": {
+      "Animals": {
+        "toggled": false,
+        "children": {
+          "Color": [
+            0.33333334,
+            0.7058823,
+            1.0
+          ]
+        }
+      },
+      "Armorstands": {
+        "toggled": false,
+        "children": {
+          "Color": [
+            0.15151516,
+            0.6875,
+            0.627451
+          ]
+        }
+      },
+      "Mobs": {
+        "toggled": false,
+        "children": {
+          "Color": [
+            0.8333333,
+            0.8046875,
+            0.5019608
+          ]
+        }
+      },
+      "Crystals": {
+        "toggled": true,
+        "children": {
+          "Color": [
+            0.8333333,
+            0.8039216,
+            1.0
+          ]
+        }
+      },
+      "Items": {
+        "toggled": true,
+        "children": {
+          "Color": [
+            0.12195122,
+            0.8039216,
+            1.0
+          ]
+        }
+      },
+      "Players": {
+        "toggled": true,
+        "children": {
+          "Player Color": [
+            0.0,
+            0.7058823,
+            1.0
+          ],
+          "Friend Color": [
+            0.5,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "Vehicles": {
+        "toggled": false,
+        "children": {
+          "Color": [
+            0.0,
+            0.0,
+            0.5882353
+          ]
+        }
+      }
+    }
+  },
+  "Trail": {
+    "settings": {
+      "Color": [
+        0.0,
+        0.75,
+        0.78431374
+      ],
+      "BlendColor": {
+        "toggled": true,
+        "children": {
+          "Second Color": [
+            0.33333334,
+            0.75,
+            0.78431374
+          ]
+        }
+      }
+    }
+  },
+  "Trajectories": {
+    "settings": {
+      "Color": [
+        0.8333333,
+        0.7058823,
+        1.0
+      ]
+    }
+  }
+}
