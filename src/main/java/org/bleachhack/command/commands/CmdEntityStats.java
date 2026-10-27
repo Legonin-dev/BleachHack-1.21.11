@@ -60,7 +60,7 @@ public class CmdEntityStats extends Command {
 	}
 
 	public static double getSpeed(AbstractHorseEntity horse) {
-		return round(20 * horse.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED), 2);
+		return round(20 * horse.getAttributeValue(EntityAttributes.MOVEMENT_SPEED), 2);
 	}
 
 	public static double getSpeedLiving(LivingEntity entity) {
@@ -68,6 +68,7 @@ public class CmdEntityStats extends Command {
 	}
 
 	public static double getJumpHeight(AbstractHorseEntity horse) {
-		return round(-0.1817584952 * Math.pow(horse.getJumpStrength(), 3) + 3.689713992 * Math.pow(horse.getJumpStrength(), 2) + 2.128599134 * horse.getJumpStrength() - 0.343930367, 3);
+		double jumpStrength = horse.getAttributeValue(EntityAttributes.JUMP_STRENGTH);
+		return round(-0.1817584952 * Math.pow(jumpStrength, 3) + 3.689713992 * Math.pow(jumpStrength, 2) + 2.128599134 * jumpStrength - 0.343930367, 3);
 	}
 }

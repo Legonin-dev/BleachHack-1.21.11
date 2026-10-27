@@ -26,11 +26,11 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket.Mode;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -150,7 +150,7 @@ public class WorldUtils {
 
 			Block neighborBlock = mc.world.getBlockState(pos.offset(d)).getBlock();
 
-			if (!airPlace && neighborBlock.getDefaultState().getMaterial().isReplaceable())
+			if (!airPlace && neighborBlock.getDefaultState().isReplaceable())
 				continue;
 
 			Vec3d vec = getLegitLookPos(pos.offset(d), d.getOpposite(), true, 5);
@@ -167,7 +167,7 @@ public class WorldUtils {
 				}
 			}
 
-			int prevSlot = mc.player.getInventory().selectedSlot;
+			int prevSlot = mc.player.getInventory().getSelectedSlot();
 			Hand hand = InventoryUtils.selectSlot(slot);
 
 			if (hand == null) {
@@ -181,7 +181,7 @@ public class WorldUtils {
 			}
 
 			if (RIGHTCLICKABLE_BLOCKS.contains(neighborBlock)) {
-				mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, Mode.PRESS_SHIFT_KEY));
+				setSneakingPacket(true);
 			}
 
 			if (swingHand) {
@@ -194,14 +194,22 @@ public class WorldUtils {
 					new BlockHitResult(Vec3d.ofCenter(pos), airPlace ? d : d.getOpposite(), airPlace ? pos : pos.offset(d), false));
 
 			if (RIGHTCLICKABLE_BLOCKS.contains(neighborBlock))
-				mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, Mode.RELEASE_SHIFT_KEY));
+				setSneakingPacket(false);
 
-			mc.player.getInventory().selectedSlot = prevSlot;
+			mc.player.getInventory().setSelectedSlot(prevSlot);
 
 			return true;
 		}
 
 		return false;
+	}
+
+	// Sneak state is now sent through PlayerInputC2SPacket (the old shift key
+	// press/release packets were removed).
+	private static void setSneakingPacket(boolean sneaking) {
+		PlayerInput input = mc.player.input.playerInput;
+		mc.player.networkHandler.sendPacket(new PlayerInputC2SPacket(new PlayerInput(
+				input.forward(), input.backward(), input.left(), input.right(), input.jump(), sneaking, input.sprint())));
 	}
 
 	public static Vec3d getLegitLookPos(BlockPos pos, Direction dir, boolean raycast, int res) {
@@ -211,16 +219,16 @@ public class WorldUtils {
 	public static Vec3d getLegitLookPos(Box box, Direction dir, boolean raycast, int res, double extrude) {
 		Vec3d eyePos = mc.player.getEyePos();
 		Vec3d blockPos = new Vec3d(box.minX, box.minY, box.minZ).add(
-				(dir == Direction.WEST ? -extrude : dir.getOffsetX() * box.getXLength() + extrude),
-				(dir == Direction.DOWN ? -extrude : dir.getOffsetY() * box.getYLength() + extrude),
-				(dir == Direction.NORTH ? -extrude : dir.getOffsetZ() * box.getZLength() + extrude));
+				(dir == Direction.WEST ? -extrude : dir.getOffsetX() * box.getLengthX() + extrude),
+				(dir == Direction.DOWN ? -extrude : dir.getOffsetY() * box.getLengthY() + extrude),
+				(dir == Direction.NORTH ? -extrude : dir.getOffsetZ() * box.getLengthZ() + extrude));
 
 		for (double i = 0; i <= 1; i += 1d / (double) res) {
 			for (double j = 0; j <= 1; j += 1d / (double) res) {
 				Vec3d lookPos = blockPos.add(
-						(dir.getAxis() == Axis.X ? 0 : i * box.getXLength()),
-						(dir.getAxis() == Axis.Y ? 0 : dir.getAxis() == Axis.Z ? j * box.getYLength() : i * box.getYLength()),
-						(dir.getAxis() == Axis.Z ? 0 : j * box.getZLength()));
+						(dir.getAxis() == Axis.X ? 0 : i * box.getLengthX()),
+						(dir.getAxis() == Axis.Y ? 0 : dir.getAxis() == Axis.Z ? j * box.getLengthY() : i * box.getLengthY()),
+						(dir.getAxis() == Axis.Z ? 0 : j * box.getLengthZ()));
 
 				if (eyePos.distanceTo(lookPos) > 4.55)
 					continue;
@@ -240,7 +248,7 @@ public class WorldUtils {
 	}
 
 	public static boolean isBlockEmpty(BlockPos pos) {
-		if (!mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+		if (!mc.world.getBlockState(pos).isReplaceable()) {
 			return false;
 		}
 
@@ -281,7 +289,7 @@ public class WorldUtils {
 		mc.player.networkHandler.sendPacket(
 				new PlayerMoveC2SPacket.LookAndOnGround(
 						mc.player.getYaw() + MathHelper.wrapDegrees(rot[0] - mc.player.getYaw()),
-						mc.player.getPitch() + MathHelper.wrapDegrees(rot[1] - mc.player.getPitch()), mc.player.isOnGround()));
+						mc.player.getPitch() + MathHelper.wrapDegrees(rot[1] - mc.player.getPitch()), mc.player.isOnGround(), false));
 	}
 	
 	public static float[] getViewingRotation(Entity entity, double x, double y, double z) {

@@ -1,14 +1,14 @@
 plugins {
-	id "fabric-loom" version "1.1-SNAPSHOT"
+	id "net.fabricmc.fabric-loom-remap" version "${loom_version}"
 	id "maven-publish"
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
-
-archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
 
 loom {
 	accessWidenerPath = file("src/main/resources/bleachhack.accesswidener")
@@ -26,13 +26,11 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	// include(modImplementation("com.github.fzakaria:ascii85:1.2"))
-
-	 include(modImplementation("com.github.BleachDev:DiscordIPC:1dca11fce3")) {
-        exclude group: 'com.google.code.gson', module: 'gson'
-	 }
-	 include(modImplementation("com.kohlschutter.junixsocket:junixsocket-common:2.2.1"))
-	 include(modImplementation("com.kohlschutter.junixsocket:junixsocket-native-common:2.2.1"))
+	include(modImplementation("com.github.BleachDev:DiscordIPC:1dca11fce3")) {
+		exclude group: 'com.google.code.gson', module: 'gson'
+	}
+	include(modImplementation("com.kohlschutter.junixsocket:junixsocket-common:2.2.1"))
+	include(modImplementation("com.kohlschutter.junixsocket:junixsocket-native-common:2.2.1"))
 }
 
 processResources {
@@ -44,36 +42,28 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-	it.options.release = 17
+	it.options.release = 21
+	it.options.compilerArgs.addAll(['-Xmaxerrs', '10000'])
 }
 
 java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
 	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 }
 
 jar {
 	from("LICENSE") {
-		rename { "${it}-${project.archivesBaseName}"}
+		rename { "${it}-${project.archives_base_name}"}
 	}
 }
 
-// configure the maven publication
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			from components.java
 		}
 	}
-
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
 	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
 	}
 }

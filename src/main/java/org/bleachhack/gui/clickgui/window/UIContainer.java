@@ -7,7 +7,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 
 public class UIContainer {
 
@@ -16,10 +16,10 @@ public class UIContainer {
 	public UIContainer() {
 	}
 
-	public void render(MatrixStack matrices) {
+	public void render(DrawContext ctx) {
 		for (UIWindow w: windows.values()) {
 			if (!w.shouldClose()) {
-				w.renderUI(matrices);
+				w.renderUI(ctx);
 			}
 		}
 	}

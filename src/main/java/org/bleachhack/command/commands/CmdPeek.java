@@ -33,7 +33,7 @@ public class CmdPeek extends Command {
 
 	@Override
 	public void onCommand(String alias, String[] args) throws Exception {
-		ItemStack item = mc.player.getInventory().getMainHandStack();
+		ItemStack item = mc.player.getMainHandStack();
 
 		if (item.getItem() instanceof BlockItem) {
 			Block block = ((BlockItem) item.getItem()).getBlock();

@@ -69,11 +69,11 @@ public class Tracers extends Module {
 			int[] col = getColor(e);
 
 			if (col != null) {
-				Vec3d vec = e.getPos().subtract(Renderer.getInterpolationOffset(e));
+				Vec3d vec = e.getEntityPos().subtract(Renderer.getInterpolationOffset(e));
 				Vec3d vec2 = new Vec3d(0, 0, 75)
 						.rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
 						.rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))
-						.add(mc.cameraEntity.getEyePos());
+						.add(mc.getCameraEntity().getEyePos());
 
 				LineColor lineColor =  LineColor.single(col[0], col[1], col[2], opacity);
 				Renderer.drawLine(vec2.x, vec2.y, vec2.z, vec.x, vec.y, vec.z, lineColor, width);

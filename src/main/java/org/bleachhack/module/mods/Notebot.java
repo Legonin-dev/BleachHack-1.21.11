@@ -9,7 +9,7 @@
 package org.bleachhack.module.mods;
 
 import net.minecraft.block.NoteBlock;
-import net.minecraft.block.enums.Instrument;
+import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -203,9 +203,9 @@ public class Notebot extends Module {
 		}
 	}
 
-	public Instrument getInstrument(BlockPos pos) {
+	public NoteBlockInstrument getInstrument(BlockPos pos) {
 		if (!isNoteblock(pos))
-			return Instrument.HARP;
+			return NoteBlockInstrument.HARP;
 
 		return mc.world.getBlockState(pos).get(NoteBlock.INSTRUMENT);
 	}

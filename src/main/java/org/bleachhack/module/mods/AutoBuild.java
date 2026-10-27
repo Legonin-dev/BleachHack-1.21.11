@@ -162,8 +162,8 @@ public class AutoBuild extends Module {
 	@BleachSubscribe
 	public void onTick(EventTick event) {
 		if (!active) {
-			ray = (BlockHitResult) mc.player.raycast(40, mc.getTickDelta(), false);
-			Direction dir = ray.getSide().getAxis() == Axis.Y ? Direction.fromRotation(mc.player.getYaw()) : ray.getSide();
+			ray = (BlockHitResult) mc.player.raycast(40, mc.getRenderTickCounter().getTickProgress(false), false);
+			Direction dir = ray.getSide().getAxis() == Axis.Y ? Direction.fromHorizontalDegrees(mc.player.getYaw()) : ray.getSide();
 
 			current = OperationList.create(BLUEPRINTS.get(getSetting(0).asMode().getMode()), ray.getBlockPos().offset(ray.getSide()), dir);
 

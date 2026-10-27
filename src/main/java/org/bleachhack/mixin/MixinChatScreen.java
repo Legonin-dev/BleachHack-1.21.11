@@ -16,13 +16,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.input.KeyInput;
 
 @Mixin(ChatScreen.class)
 public class MixinChatScreen {
 
 	@Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-	private void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> callback) {
-		EventKeyPress.InChat event = new EventKeyPress.InChat(keyCode, scanCode, modifiers);
+	private void keyPressed(KeyInput input, CallbackInfoReturnable<Boolean> callback) {
+		EventKeyPress.InChat event = new EventKeyPress.InChat(input.key(), input.scancode(), input.modifiers());
 		BleachHack.eventBus.post(event);
 
 		if (event.isCancelled()) {

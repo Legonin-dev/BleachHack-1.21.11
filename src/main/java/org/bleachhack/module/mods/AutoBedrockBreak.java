@@ -51,7 +51,7 @@ public class AutoBedrockBreak extends Module {
 		if (pos != null) {
 			switch (step) {
 				case 0:
-					if (!mc.world.isSpaceEmpty(new Box(pos.up(), pos.add(1, 8, 1)))) {
+					if (!mc.world.isSpaceEmpty(Box.enclosing(pos.up(), pos.add(1, 8, 1)))) {
 						reset();
 						BleachLogger.info("Not enough empty space to break this block!");
 					} else if (InventoryUtils.getSlot(true, i -> mc.player.getInventory().getStack(i).getItem() == Items.PISTON) == -1) {
@@ -72,7 +72,7 @@ public class AutoBedrockBreak extends Module {
 
 					break;
 				case 1:
-					mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), 90, mc.player.isOnGround()));
+					mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), 90, mc.player.isOnGround(), false));
 					// mc.player.setPitch(90) "its jank either way"
 					step++;
 
@@ -115,7 +115,7 @@ public class AutoBedrockBreak extends Module {
 					}
 
 					if (step >= 82) {
-						mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), -90, mc.player.isOnGround()));
+						mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), -90, mc.player.isOnGround(), false));
 						// mc.player.setPitch(-90) "its jank either way"
 					}
 

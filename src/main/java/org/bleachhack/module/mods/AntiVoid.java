@@ -40,7 +40,7 @@ public class AntiVoid extends Module {
 					mc.player.setOnGround(true);
 					break;
 				case 2:
-					for (int i = mc.world.getBottomY() + 3; i < mc.world.getTopY() + 1; i++) {
+					for (int i = mc.world.getBottomY() + 3; i < mc.world.getHeight() + 1; i++) {
 						if (!WorldUtils.doesBoxCollide(mc.player.getBoundingBox().offset(0, -mc.player.getY() + i, 0))) {
 							mc.player.updatePosition(mc.player.getX(), i, mc.player.getZ());
 							break;

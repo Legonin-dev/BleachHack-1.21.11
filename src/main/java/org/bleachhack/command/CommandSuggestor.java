@@ -1,5 +1,6 @@
 package org.bleachhack.command;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -11,10 +12,11 @@ import org.bleachhack.event.events.EventRenderInGameHud;
 import org.bleachhack.eventbus.BleachSubscribe;
 import org.bleachhack.mixin.AccessorChatScreen;
 import org.bleachhack.setting.option.Option;
+import org.bleachhack.util.render.RenderUtils;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -79,9 +81,10 @@ public class CommandSuggestor {
 				}
 			}
 
-			if (!suggestions.isEmpty()) {
-				event.getMatrix().push();
-				event.getMatrix().translate(0, 0, 200);
+			DrawContext context = getDrawContext(event);
+
+			if (!suggestions.isEmpty() && context != null) {
+				context.getMatrices().pushMatrix();
 
 				int length = suggestions.stream()
 						.map(s -> MinecraftClient.getInstance().textRenderer.getWidth(s))
@@ -93,16 +96,48 @@ public class CommandSuggestor {
 				for (int i = scroll; i < suggestions.size() && i < scroll + 10; i++) {
 					String suggestion = suggestions.get(i);
 
-					DrawableHelper.fill(event.getMatrix(), startX, startY, startX + length + 2, startY + 12, 0xd0000000);
-					MinecraftClient.getInstance().textRenderer.drawWithShadow(
-							event.getMatrix(), suggestion, startX + 1, startY + 2, i == selected ? 0xffff00: 0xb0b0b0);
+					context.fill(startX, startY, startX + length + 2, startY + 12, 0xd0000000);
+					context.drawTextWithShadow(
+							MinecraftClient.getInstance().textRenderer, suggestion, startX + 1, startY + 2,RenderUtils.fixColor(i == selected ? 0xffff00: 0xb0b0b0));
 
 					startY += 12;
 				}
 
-				event.getMatrix().pop();
+				context.getMatrices().popMatrix();
 			}
 		}
+	}
+
+	/**
+	 * The 1.21.11 port replaces the MatrixStack in EventRenderInGameHud with a DrawContext.
+	 * Resolve it reflectively so this keeps compiling while the event is migrated.
+	 */
+	private static Method hudContextGetter;
+
+	private static DrawContext getDrawContext(EventRenderInGameHud event) {
+		if (hudContextGetter == null) {
+			for (String getter : new String[] { "getContext", "getMatrix" }) {
+				try {
+					hudContextGetter = EventRenderInGameHud.class.getMethod(getter);
+					break;
+				} catch (NoSuchMethodException ignored) {
+				}
+			}
+
+			if (hudContextGetter == null)
+				return null;
+		}
+
+		try {
+			Object value = hudContextGetter.invoke(event);
+
+			if (value instanceof DrawContext context)
+				return context;
+		} catch (ReflectiveOperationException e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 	@BleachSubscribe

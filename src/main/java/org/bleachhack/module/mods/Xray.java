@@ -23,9 +23,8 @@ import org.bleachhack.util.world.WorldUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.FernBlock;
 import net.minecraft.block.TallPlantBlock;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.BlockRenderLayer;
 
 public class Xray extends Module {
 
@@ -108,28 +107,9 @@ public class Xray extends Module {
 	}
 
 	@BleachSubscribe
-	public void onRenderBlockTesselate(EventRenderBlock.Tesselate event) {
-		if (!getSetting(2).asList(Block.class).contains(event.getState().getBlock())) {
-			if (getSetting(1).asToggle().getState()) {
-				if (getSetting(1).asToggle().getChild(1).asToggle().getState()
-						&& (event.getState().getBlock() instanceof FernBlock
-								|| event.getState().getBlock() instanceof TallPlantBlock
-								|| WorldUtils.getTopBlockIgnoreLeaves(event.getPos().getX(), event.getPos().getZ()) == event.getPos().getY())) {
-					event.setCancelled(true);
-					return;
-				}
-
-				event.getVertexConsumer().fixedColor(-1, -1, -1, getSetting(1).asToggle().getChild(0).asSlider().getValueInt());
-			} else {
-				event.setCancelled(true);
-			}
-		}
-	}
-
-	@BleachSubscribe
 	public void onRenderBlockLayer(EventRenderBlock.Layer event) {
 		if (getSetting(1).asToggle().getState() && !getSetting(2).asList(Block.class).contains(event.getState().getBlock())) {
-			event.setLayer(RenderLayer.getTranslucent());
+			event.setLayer(BlockRenderLayer.TRANSLUCENT);
 		}
 	}
 

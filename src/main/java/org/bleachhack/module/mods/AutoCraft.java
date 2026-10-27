@@ -2,7 +2,6 @@ package org.bleachhack.module.mods;
 
 import java.util.List;
 
-import net.minecraft.registry.DynamicRegistryManager;
 import org.bleachhack.event.events.EventTick;
 import org.bleachhack.eventbus.BleachSubscribe;
 import org.bleachhack.module.Module;
@@ -14,7 +13,6 @@ import org.bleachhack.util.BleachLogger;
 
 import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection;
 import net.minecraft.item.Item;
-import net.minecraft.recipe.Recipe;
 import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 
@@ -67,10 +65,13 @@ public class AutoCraft extends Module {
 		boolean craftAll = getSetting(1).asToggle().getState();
 		boolean drop = getSetting(2).asToggle().getState();
 
+		net.minecraft.util.context.ContextParameterMap parameters =
+				net.minecraft.recipe.display.SlotDisplayContexts.createParameters(mc.world);
+
 		for (RecipeResultCollection recipeResultCollection : recipeResultCollectionList) {
-			for (Recipe<?> recipe : recipeResultCollection.getRecipes(true)) {
-				if (getSetting(0).asList(Item.class).contains(recipe.getOutput(DynamicRegistryManager.EMPTY).getItem())) {
-					mc.interactionManager.clickRecipe(currentScreenHandler.syncId, recipe, craftAll);
+			for (net.minecraft.recipe.RecipeDisplayEntry recipe : recipeResultCollection.getAllRecipes()) {
+				if (getSetting(0).asList(Item.class).contains(recipe.display().result().getFirst(parameters).getItem())) {
+					mc.interactionManager.clickRecipe(currentScreenHandler.syncId, recipe.id(), craftAll);
 					mc.interactionManager.clickSlot(currentScreenHandler.syncId, 0, 0,
 							drop ? SlotActionType.THROW : SlotActionType.QUICK_MOVE, mc.player);
 

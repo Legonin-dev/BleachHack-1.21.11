@@ -19,7 +19,6 @@ import org.bleachhack.util.InventoryUtils;
 
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -92,8 +91,8 @@ public class AutoEXP extends Module {
 				}
 
 				if (slot >= 46) {
-					if (slot - 46 != mc.player.getInventory().selectedSlot) {
-						mc.player.getInventory().selectedSlot = slot - 46;
+					if (slot - 46 != mc.player.getInventory().getSelectedSlot()) {
+						mc.player.getInventory().setSelectedSlot(slot - 46);
 						mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot - 46));
 					}
 
@@ -106,7 +105,7 @@ public class AutoEXP extends Module {
 			}
 
 			for (int i = 5; i <= 8; i++) {
-				if (i != slot && EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.currentScreenHandler.getSlot(i).getStack()) != 0) {
+				if (i != slot && org.bleachhack.util.EnchantmentUtils.getLevel(Enchantments.MENDING, mc.player.currentScreenHandler.getSlot(i).getStack()) != 0) {
 					for (int j = 1; j <= 4; j++) {
 						ItemStack craftingStack = mc.player.currentScreenHandler.getSlot(j).getStack();
 						if (!craftingStack.isDamageable()) {
@@ -122,8 +121,8 @@ public class AutoEXP extends Module {
 			}
 
 			if (slot > 8 && slot < 45) {
-				if (slot - 36 != mc.player.getInventory().selectedSlot) {
-					mc.player.getInventory().selectedSlot = slot - 36;
+				if (slot - 36 != mc.player.getInventory().getSelectedSlot()) {
+					mc.player.getInventory().setSelectedSlot(slot - 36);
 					mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot - 36));
 				}
 
@@ -138,15 +137,12 @@ public class AutoEXP extends Module {
 				int toThrow = Math.min(getSetting(5).asSlider().getValueInt(), xpNeeded);
 
 				if (toThrow != 0) {
-					mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), 90, mc.player.isOnGround()));
+					mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), 90, mc.player.isOnGround(), false));
 					for (int t = 0; t < toThrow; t++) {
 						if (InventoryUtils.selectSlot(false, i -> mc.player.getInventory().getStack(i).getItem() == Items.EXPERIENCE_BOTTLE) == Hand.MAIN_HAND) {
 							// Trying to use without bruh
-							mc.player.networkHandler.sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, 0));
-							ItemStack itemStack2 = mc.player.getMainHandStack().use(mc.world, mc.player, Hand.MAIN_HAND).getValue();
-							if (itemStack2 != mc.player.getMainHandStack()) {
-								mc.player.setStackInHand(Hand.MAIN_HAND, itemStack2);
-							}
+							mc.player.networkHandler.sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, 0, mc.player.getYaw(), mc.player.getPitch()));
+							mc.player.getMainHandStack().use(mc.world, mc.player, Hand.MAIN_HAND);
 
 							xpNeeded--;
 						}
@@ -166,7 +162,7 @@ public class AutoEXP extends Module {
 		}
 
 		if (getSetting(1).asToggle().getState())
-			slots.add(36 + mc.player.getInventory().selectedSlot);
+			slots.add(36 + mc.player.getInventory().getSelectedSlot());
 
 		if (getSetting(2).asToggle().getState())
 			slots.add(45);

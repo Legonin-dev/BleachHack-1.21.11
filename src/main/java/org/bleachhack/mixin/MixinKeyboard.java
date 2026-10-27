@@ -13,6 +13,7 @@ import org.bleachhack.command.Command;
 import org.bleachhack.event.events.EventKeyPress;
 import org.bleachhack.module.ModuleManager;
 import org.bleachhack.setting.option.Option;
+import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,35 +22,39 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.input.KeyInput;
 
 @Mixin(Keyboard.class)
 public class MixinKeyboard {
 
 	@Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
-	private void onKeyEvent(long windowPointer, int key, int scanCode, int action, int modifiers, CallbackInfo callbackInfo) {
-		if (key >= 0) {
-			EventKeyPress.Global event = new EventKeyPress.Global(key, scanCode, action, modifiers);
-			BleachHack.eventBus.post(event);
+	private void onKeyEvent(long windowPointer, int action, KeyInput input, CallbackInfo callbackInfo) {
+		int key = input.key();
+		int scanCode = input.scancode();
 
-			if (event.isCancelled()) {
-				callbackInfo.cancel();
+		if (key < 0) {
+			return;
+		}
+
+		EventKeyPress.Global event = new EventKeyPress.Global(key, scanCode, action, input.modifiers());
+		BleachHack.eventBus.post(event);
+
+		if (event.isCancelled()) {
+			callbackInfo.cancel();
+			return;
+		}
+
+		if (action == GLFW.GLFW_PRESS && MinecraftClient.getInstance().currentScreen == null) {
+			if (Option.CHAT_QUICK_PREFIX.getValue() && Command.getPrefix().length() == 1 && key == Command.getPrefix().charAt(0)) {
+				MinecraftClient.getInstance().setScreen(new ChatScreen(Command.getPrefix(), false));
 			}
-		}
-	}
-	
-	@Inject(method = "onKey", at = @At(value = "INVOKE", target = "net/minecraft/client/util/InputUtil.isKeyPressed(JI)Z", ordinal = 5), cancellable = true)
-	private void onKeyEvent_1(long windowPointer, int key, int scanCode, int action, int modifiers, CallbackInfo callbackInfo) {
-		if (Option.CHAT_QUICK_PREFIX.getValue() && Command.getPrefix().length() == 1 && key == Command.getPrefix().charAt(0)) {
-			MinecraftClient.getInstance().setScreen(new ChatScreen(Command.getPrefix()));
-		}
 
-		ModuleManager.handleKey(key);
+			ModuleManager.handleKey(key);
 
-		if (key >= 0) {
-			EventKeyPress.InWorld event = new EventKeyPress.InWorld(key, scanCode);
-			BleachHack.eventBus.post(event);
+			EventKeyPress.InWorld inWorldEvent = new EventKeyPress.InWorld(key, scanCode);
+			BleachHack.eventBus.post(inWorldEvent);
 
-			if (event.isCancelled()) {
+			if (inWorldEvent.isCancelled()) {
 				callbackInfo.cancel();
 			}
 		}

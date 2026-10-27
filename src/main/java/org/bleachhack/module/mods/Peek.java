@@ -20,8 +20,6 @@ import org.bleachhack.setting.module.SettingSlider;
 import org.bleachhack.setting.module.SettingToggle;
 import org.bleachhack.util.ItemContentUtils;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BarrelBlock;
 import net.minecraft.block.Block;
@@ -29,33 +27,25 @@ import net.minecraft.block.ChestBlock;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.block.HopperBlock;
 import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.render.MapRenderState;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.map.MapState;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.joml.Matrix4f;
 
 public class Peek extends Module {
 
-	private static final RenderLayer MAP_BACKGROUND_CHECKERBOARD = RenderLayer.getText(new Identifier("textures/map/map_background_checkerboard.png"));
+	private static final Identifier MAP_BACKGROUND_CHECKERBOARD = Identifier.of("textures/map/map_background_checkerboard.png");
 
 	private List<List<String>> pages;
 	private int slotX = -1;
@@ -90,11 +80,12 @@ public class Peek extends Module {
 			slotY = slot.y;
 		}
 
-		event.getMatrix().push();
-		event.getMatrix().translate(0, 0, 400);
+		DrawContext ctx = event.getContext();
+		ctx.getMatrices().pushMatrix();
+		ctx.getMatrices().translate(0, 0);
 
 		if (getSetting(0).asToggle().getState()) {
-			List<TooltipComponent> components = drawShulkerToolTip(event.getMatrix(), slot, event.getMouseX(), event.getMouseY());
+			List<TooltipComponent> components = drawShulkerToolTip(ctx, slot, event.getMouseX(), event.getMouseY());
 			if (components != null) {
 				if (components.isEmpty()) {
 					event.setCancelled(true);
@@ -104,13 +95,13 @@ public class Peek extends Module {
 			}
 		}
 
-		if (getSetting(1).asToggle().getState()) drawBookToolTip(event.getMatrix(), slot, event.getMouseX(), event.getMouseY());
-		if (getSetting(2).asToggle().getState()) drawMapToolTip(event.getMatrix(), slot, event.getMouseX(), event.getMouseY());
+		if (getSetting(1).asToggle().getState()) drawBookToolTip(ctx, slot, event.getMouseX(), event.getMouseY());
+		if (getSetting(2).asToggle().getState()) drawMapToolTip(ctx, slot, event.getMouseX(), event.getMouseY());
 
-		event.getMatrix().pop();
+		ctx.getMatrices().popMatrix();
 	}
 
-	public List<TooltipComponent> drawShulkerToolTip(MatrixStack matrices, Slot slot, int mouseX, int mouseY) {
+	public List<TooltipComponent> drawShulkerToolTip(DrawContext ctx, Slot slot, int mouseX, int mouseY) {
 		if (!(slot.getStack().getItem() instanceof BlockItem)) {
 			return null;
 		}
@@ -137,7 +128,7 @@ public class Peek extends Module {
 		int tooltipWidth = block instanceof AbstractFurnaceBlock ? 47 : block instanceof HopperBlock ? 82 : 150;
 		int tooltipHeight = block instanceof AbstractFurnaceBlock || block instanceof HopperBlock || block instanceof DispenserBlock ? 13 : 47;
 
-		renderTooltipBox(matrices, mouseX, realY - tooltipHeight - 7, tooltipWidth, tooltipHeight, true);
+		renderTooltipBox(ctx, mouseX, realY - tooltipHeight - 7, tooltipWidth, tooltipHeight, true);
 
 		int count = block instanceof HopperBlock || block instanceof DispenserBlock || block instanceof AbstractFurnaceBlock ? 18 : 0;
 
@@ -149,10 +140,8 @@ public class Peek extends Module {
 			int x = mouseX + 11 + 17 * (count % 9);
 			int y = realY - 67 + 17 * (count / 9);
 
-			// mc.getItemRenderer().zOffset = 400;
-			mc.getItemRenderer().renderInGuiWithOverrides(matrices, i, x, y);
-			mc.getItemRenderer().renderGuiItemOverlay(matrices, mc.textRenderer, i, x, y, null);
-			// mc.getItemRenderer().zOffset = 300;
+			ctx.drawItem(i, x, y);
+			ctx.drawStackOverlay(mc.textRenderer, i, x, y);
 			count++;
 		}
 
@@ -165,7 +154,7 @@ public class Peek extends Module {
 		return null;
 	}
 
-	public void drawBookToolTip(MatrixStack matrices, Slot slot, int mouseX, int mouseY) {
+	public void drawBookToolTip(DrawContext ctx, Slot slot, int mouseX, int mouseY) {
 		if (slot.getStack().getItem() != Items.WRITABLE_BOOK && slot.getStack().getItem() != Items.WRITTEN_BOOK)
 			return;
 
@@ -189,53 +178,38 @@ public class Peek extends Module {
 			shown = false;
 		}
 
-		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.setShaderTexture(0, BookScreen.BOOK_TEXTURE);
-		DrawableHelper.drawTexture(
-				matrices,
-				mouseX, mouseY - 143, 0,
-				0, 0,
-				134, 134,
-				179, 179);
+		ctx.drawGuiTexture(RenderPipelines.GUI_TEXTURED, BookScreen.BOOK_TEXTURE, mouseX, mouseY - 143, 134, 134);
 
 		Text pageIndexText = Text.translatable("book.pageIndicator", pageCount + 1, pages.size());
 		int pageIndexLength = mc.textRenderer.getWidth(pageIndexText);
 
-		matrices.push();
-		matrices.scale(0.7f, 0.7f, 1f);
+		ctx.getMatrices().pushMatrix();
+		ctx.getMatrices().scale(0.7f, 0.7f);
 
-		mc.textRenderer.draw(
-				matrices,
-				pageIndexText,
-				(mouseX + 123 - pageIndexLength) * 1.43f,
-				(mouseY - 133) * 1.43f,
-				0x000000);
+		ctx.drawText(mc.textRenderer, pageIndexText,
+				(int) ((mouseX + 123 - pageIndexLength) * 1.43f),
+				(int) ((mouseY - 133) * 1.43f),0xFF000000, false);
 
 
 		int count = 0;
 		for (String s : pages.get(pageCount)) {
-			mc.textRenderer.draw(
-					matrices,
-					s,
-					(mouseX + 24) * 1.43f,
-					(mouseY - 123 + count * 7) * 1.43f,
-					0x000000);
+			ctx.drawText(mc.textRenderer, s,
+					(int) ((mouseX + 24) * 1.43f),
+					(int) ((mouseY - 123 + count * 7) * 1.43f),0xFF000000, false);
 
 			count++;
 		}
 
-		matrices.pop();
+		ctx.getMatrices().popMatrix();
 
 	}
 
-	public void drawMapToolTip(MatrixStack matrices, Slot slot, int mouseX, int mouseY) {
+	public void drawMapToolTip(DrawContext ctx, Slot slot, int mouseX, int mouseY) {
 		if (slot.getStack().getItem() != Items.FILLED_MAP) {
 			return;
 		}
 
-		Integer id = FilledMapItem.getMapId(slot.getStack());
-		MapState mapState = FilledMapItem.getMapState(id, mc.world);
+		MapState mapState = FilledMapItem.getMapState(slot.getStack(), mc.world);
 
 		if (mapState == null) {
 			return;
@@ -243,26 +217,20 @@ public class Peek extends Module {
 
 		float scale = getSetting(2).asToggle().getChild(0).asSlider().getValueFloat() / 1.25f;
 
-		matrices.push();
-		matrices.translate(mouseX + 14, mouseY - 18 - 135 * scale, 0);
-		matrices.scale(scale, scale, 0.0078125f);
+		ctx.getMatrices().pushMatrix();
+		ctx.getMatrices().translate(mouseX + 14, mouseY - 18 - 135 * scale);
+		ctx.getMatrices().scale(scale, scale);
 
-		VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-		VertexConsumer backgroundVertexer = immediate.getBuffer(MAP_BACKGROUND_CHECKERBOARD);
-		Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-		backgroundVertexer.vertex(matrix4f, -7f, 135f, -10f).color(255, 255, 255, 255).texture(0f, 1f).light(0xf000f0).next();
-		backgroundVertexer.vertex(matrix4f, 135f, 135f, -10f).color(255, 255, 255, 255).texture(1f, 1f).light(0xf000f0).next();
-		backgroundVertexer.vertex(matrix4f, 135f, -7f, -10f).color(255, 255, 255, 255).texture(1f, 0f).light(0xf000f0).next();
-		backgroundVertexer.vertex(matrix4f, -7f, -7f, -10f).color(255, 255, 255, 255).texture(0f, 0f).light(0xf000f0).next();
+		ctx.drawGuiTexture(RenderPipelines.GUI_TEXTURED, MAP_BACKGROUND_CHECKERBOARD, -7, -7, 142, 142);
 
-		mc.gameRenderer.getMapRenderer().draw(matrices, immediate, id, mapState, false, 0xf000f0);
-		immediate.draw();
+		MapRenderState state = new MapRenderState();
+		mc.getMapRenderer().update(slot.getStack().get(DataComponentTypes.MAP_ID), mapState, state);
+		ctx.drawMap(state);
 
-		matrices.pop();
-
+		ctx.getMatrices().popMatrix();
 	}
 
-	private void renderTooltipBox(MatrixStack matrices, int x1, int y1, int x2, int y2, boolean wrap) {
+	private void renderTooltipBox(DrawContext ctx, int x1, int y1, int x2, int y2, boolean wrap) {
 		int xStart = x1 + 12;
 		int yStart = y1 - 12;
 		if (wrap) {
@@ -272,40 +240,19 @@ public class Peek extends Module {
 				yStart = mc.currentScreen.height - y2 - 6;
 		}
 
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder bufferBuilder = tessellator.getBuffer();
-		bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+		int background = 0xF0100010;
+		int borderStart = 0x505000FF;
+		int borderEnd = 0x5028007F;
 
-		Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-		fillGradient(matrix4f, bufferBuilder, xStart - 3, yStart - 4, xStart + x2 + 3, yStart - 3, -267386864, -267386864);
-		fillGradient(matrix4f, bufferBuilder, xStart - 3, yStart + y2 + 3, xStart + x2 + 3, yStart + y2 + 4, -267386864, -267386864);
-		fillGradient(matrix4f, bufferBuilder, xStart - 3, yStart - 3, xStart + x2 + 3, yStart + y2 + 3, -267386864, -267386864);
-		fillGradient(matrix4f, bufferBuilder, xStart - 4, yStart - 3, xStart - 3, yStart + y2 + 3, -267386864, -267386864);
-		fillGradient(matrix4f, bufferBuilder, xStart + x2 + 3, yStart - 3, xStart + x2 + 4, yStart + y2 + 3, -267386864, -267386864);
-		fillGradient(matrix4f, bufferBuilder, xStart - 3, yStart - 3 + 1, xStart - 3 + 1, yStart + y2 + 3 - 1, 1347420415, 1344798847);
-		fillGradient(matrix4f, bufferBuilder, xStart + x2 + 2, yStart - 3 + 1, xStart + x2 + 3, yStart + y2 + 3 - 1, 1347420415, 1344798847);
-		fillGradient(matrix4f, bufferBuilder, xStart - 3, yStart - 3, xStart + x2 + 3, yStart - 3 + 1, 1347420415, 1347420415);
-		fillGradient(matrix4f, bufferBuilder, xStart - 3, yStart + y2 + 2, xStart + x2 + 3, yStart + y2 + 3, 1344798847, 1344798847);
+		ctx.fill(xStart - 3, yStart - 4, xStart + x2 + 3, yStart - 3, background);
+		ctx.fill(xStart - 3, yStart + y2 + 3, xStart + x2 + 3, yStart + y2 + 4, background);
+		ctx.fill(xStart - 3, yStart - 3, xStart + x2 + 3, yStart + y2 + 3, background);
+		ctx.fill(xStart - 4, yStart - 3, xStart - 3, yStart + y2 + 3, background);
+		ctx.fill(xStart + x2 + 3, yStart - 3, xStart + x2 + 4, yStart + y2 + 3, background);
 
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-		BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
-		RenderSystem.disableBlend();
-	}
-
-	private void fillGradient(Matrix4f matrices, BufferBuilder bufferBuilder, int xStart, int yStart, int xEnd, int yEnd, int colorStart, int colorEnd) {
-		float f = (float)(colorStart >> 24 & 255) / 255.0F;
-		float g = (float)(colorStart >> 16 & 255) / 255.0F;
-		float h = (float)(colorStart >> 8 & 255) / 255.0F;
-		float i = (float)(colorStart & 255) / 255.0F;
-		float j = (float)(colorEnd >> 24 & 255) / 255.0F;
-		float k = (float)(colorEnd >> 16 & 255) / 255.0F;
-		float l = (float)(colorEnd >> 8 & 255) / 255.0F;
-		float m = (float)(colorEnd & 255) / 255.0F;
-		bufferBuilder.vertex(matrices, (float) xEnd, (float) yStart, 0f).color(g, h, i, f).next();
-		bufferBuilder.vertex(matrices, (float) xStart, (float) yStart, 0f).color(g, h, i, f).next();
-		bufferBuilder.vertex(matrices, (float) xStart, (float) yEnd, 0f).color(k, l, m, j).next();
-		bufferBuilder.vertex(matrices, (float) xEnd, (float) yEnd, 0f).color(k, l, m, j).next();
+		ctx.fillGradient(xStart - 3, yStart - 3 + 1, xStart - 3 + 1, yStart + y2 + 3 - 1, borderStart, borderEnd);
+		ctx.fillGradient(xStart + x2 + 2, yStart - 3 + 1, xStart + x2 + 3, yStart + y2 + 3 - 1, borderStart, borderEnd);
+		ctx.fillGradient(xStart - 3, yStart - 3, xStart + x2 + 3, yStart - 3 + 1, borderStart, borderStart);
+		ctx.fillGradient(xStart - 3, yStart + y2 + 2, xStart + x2 + 3, yStart + y2 + 3, borderEnd, borderEnd);
 	}
 }

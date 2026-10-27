@@ -71,8 +71,8 @@ public class AutoTotem extends Module {
 			// If the player is in another inventory, atleast check the hotbar for anything to swap
 			for (int i = 0; i < 9; i++) {
 				if (mc.player.getInventory().getStack(i).getItem() == Items.TOTEM_OF_UNDYING) {
-					if (i != mc.player.getInventory().selectedSlot) {
-						mc.player.getInventory().selectedSlot = i;
+					if (i != mc.player.getInventory().getSelectedSlot()) {
+						mc.player.getInventory().setSelectedSlot(i);
 						mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(i));
 					}
 

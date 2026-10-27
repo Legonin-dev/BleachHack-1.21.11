@@ -59,11 +59,11 @@ public class Trail extends Module {
 		}
 
 		if (trails.isEmpty() || lastVec == null) {
-			lastVec = mc.player.getPos().add(0, 0.1, 0);
-			trails.put(mc.player.getPos(), lastVec);
-		} else if (mc.player.getPos().add(0, 0.1, 0).distanceTo(lastVec) > 0.15) {
-			trails.put(lastVec, mc.player.getPos().add(0, 0.1, 0));
-			lastVec = mc.player.getPos().add(0, 0.1, 0);
+			lastVec = mc.player.getEntityPos().add(0, 0.1, 0);
+			trails.put(mc.player.getEntityPos(), lastVec);
+		} else if (mc.player.getEntityPos().add(0, 0.1, 0).distanceTo(lastVec) > 0.15) {
+			trails.put(lastVec, mc.player.getEntityPos().add(0, 0.1, 0));
+			lastVec = mc.player.getEntityPos().add(0, 0.1, 0);
 		}
 	}
 

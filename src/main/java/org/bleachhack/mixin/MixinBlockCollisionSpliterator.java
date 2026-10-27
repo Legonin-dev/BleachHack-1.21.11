@@ -20,15 +20,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockCollisionSpliterator;
-import net.minecraft.world.BlockView;
+import net.minecraft.world.CollisionView;
 
 @Mixin(BlockCollisionSpliterator.class)
 public class MixinBlockCollisionSpliterator {
 
-	@Redirect(method = "computeNext", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getCollisionShape(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;"))
-	private VoxelShape computeNext_getCollisionShape(BlockState blockState, BlockView world, BlockPos pos, ShapeContext context) {
-		VoxelShape shape = blockState.getCollisionShape(world, pos, context);
-		EventBlockShape event = new EventBlockShape((BlockState) blockState, pos, shape);
+	@Redirect(method = "computeNext", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/ShapeContext;getCollisionShape(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/CollisionView;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/util/shape/VoxelShape;"))
+	private VoxelShape computeNext_getCollisionShape(ShapeContext context, BlockState blockState, CollisionView world, BlockPos pos) {
+		VoxelShape shape = context.getCollisionShape(blockState, world, pos);
+		EventBlockShape event = new EventBlockShape(blockState, pos, shape);
 		BleachHack.eventBus.post(event);
 
 		if (event.isCancelled()) {

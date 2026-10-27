@@ -16,7 +16,7 @@ import org.bleachhack.setting.SettingDataHandler;
 import org.bleachhack.gui.clickgui.window.ModuleWindow;
 import org.bleachhack.util.io.BleachFileHelper;
 
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 
 public abstract class ModuleSetting<T> extends Setting<T> {
 
@@ -103,7 +103,7 @@ public abstract class ModuleSetting<T> extends Setting<T> {
 		BleachFileHelper.SCHEDULE_SAVE_MODULES.set(true);
 	}
 
-	public abstract void render(ModuleWindow window, MatrixStack matrices, int x, int y, int len);
+	public abstract void render(ModuleWindow window, DrawContext ctx, int x, int y, int len);
 
 	public abstract int getHeight(int len);
 }

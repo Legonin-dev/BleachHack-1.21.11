@@ -16,9 +16,8 @@ import org.bleachhack.gui.window.Window;
 import org.bleachhack.setting.SettingDataHandlers;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 
@@ -47,19 +46,18 @@ public class SettingSlider extends ModuleSetting<Double> {
 		return getValue().longValue();
 	}
 
-	public void render(ModuleWindow window, MatrixStack matrices, int x, int y, int len) {
+	public void render(ModuleWindow window, DrawContext ctx, int x, int y, int len) {
 		boolean mo = window.mouseOver(x, y, x + len, y + 12);
 		if (mo) {
-			DrawableHelper.fill(matrices, x + 1, y, x + len, y + 12, 0x70303070);
+			ctx.fill(x + 1, y, x + len, y + 12, 0x70303070);
 		}
 
 		int pixels = (int) Math.round(MathHelper.clamp(len * ((getValue() - min) / (max - min)), 0, len));
-		Window.horizontalGradient(matrices, x + 1, y, x + pixels, y + 12,
+		Window.horizontalGradient(ctx, x + 1, y, x + pixels, y + 12,
 				mo ? 0xf03078b0 : 0xf03080a0, mo ? 0xf02068c0 : 0xf02070b0);
 
-		MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices,
-				getName() + ": " + (decimals == 0 ? Integer.toString(getValueInt()) : getValue()),
-				x + 3, y + 2, 0xcfe0cf);
+		ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, getName() + ": " + (decimals == 0 ? Integer.toString(getValueInt()) : getValue()),
+				x + 3, y + 2,0xFFcfe0cf);
 
 		if (window.mouseOver(x + 1, y, x + len, y + 12)) {
 			if (window.lmHeld) {
@@ -72,7 +70,7 @@ public class SettingSlider extends ModuleSetting<Double> {
 				double units = 1 / (Math.pow(10, decimals));
 
 				setValue(MathHelper.clamp(getValue() + units * window.mwScroll, min, max));
-				MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
+				MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
 			}
 		}
 	}

@@ -101,8 +101,8 @@ public class EntityControl extends Module {
 		}
 
 		if (getSetting(3).asToggle().getState()) {
-			BlockPos p = BlockPos.ofFloored(e.getPos());
-			if (!mc.world.getBlockState(p.down()).getMaterial().isReplaceable() && e.fallDistance > 0.01) {
+			BlockPos p = BlockPos.ofFloored(e.getEntityPos());
+			if (!mc.world.getBlockState(p.down()).isReplaceable() && e.fallDistance > 0.01) {
 				e.setVelocity(e.getVelocity().x, -1, e.getVelocity().z);
 			}
 		}
@@ -143,7 +143,7 @@ public class EntityControl extends Module {
 
 	@BleachSubscribe
 	public void onReadPacket(EventPacket.Read event) {
-		if (getSetting(7).asToggle().getState() && mc.player != null && mc.player.hasVehicle() && !mc.player.input.sneaking
+		if (getSetting(7).asToggle().getState() && mc.player != null && mc.player.hasVehicle() && !mc.player.input.playerInput.sneak()
 				&& (event.getPacket() instanceof PlayerPositionLookS2CPacket || event.getPacket() instanceof EntityPassengersSetS2CPacket)) {
 			event.setCancelled(true);
 		}

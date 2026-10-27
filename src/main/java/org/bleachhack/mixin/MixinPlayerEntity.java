@@ -9,30 +9,27 @@
 package org.bleachhack.mixin;
 
 import net.minecraft.registry.tag.FluidTags;
+import org.bleachhack.BleachHack;
+import org.bleachhack.event.events.EventReach;
 import org.bleachhack.module.Module;
 import org.bleachhack.module.ModuleManager;
 import org.bleachhack.module.mods.SpeedMine;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 @Mixin(PlayerEntity.class)
 public abstract class MixinPlayerEntity extends LivingEntity {
-
-	@Shadow private PlayerInventory inventory;
 
 	private MixinPlayerEntity(EntityType<? extends LivingEntity> entityType, World world) {
 		super(entityType, world);
@@ -43,13 +40,10 @@ public abstract class MixinPlayerEntity extends LivingEntity {
 		Module speedMine = ModuleManager.getModule(SpeedMine.class);
 
 		if (speedMine.isEnabled()) {
-			float breakingSpeed = inventory.getBlockBreakingSpeed(block);
+			float breakingSpeed = getMainHandStack().getMiningSpeedMultiplier(block);
+
 			if (breakingSpeed > 1.0F) {
-				int eff = EnchantmentHelper.getEfficiency(this);
-				ItemStack itemStack_1 = this.getMainHandStack();
-				if (eff > 0 && !itemStack_1.isEmpty()) {
-					breakingSpeed += eff * eff + 1;
-				}
+				breakingSpeed += (float) getAttributeValue(EntityAttributes.MINING_EFFICIENCY);
 			}
 
 			if (StatusEffectUtil.hasHaste(this)) {
@@ -78,12 +72,14 @@ public abstract class MixinPlayerEntity extends LivingEntity {
 				}
 			}
 
+			breakingSpeed *= (float) getAttributeValue(EntityAttributes.BLOCK_BREAK_SPEED);
+
 			if (!speedMine.getSetting(5).asToggle().getState()) {
-				if (this.isSubmergedIn(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(this)) {
-					breakingSpeed /= 5.0F;
+				if (this.isSubmergedIn(FluidTags.WATER)) {
+					breakingSpeed *= (float) getAttributeValue(EntityAttributes.SUBMERGED_MINING_SPEED);
 				}
 
-				if (!this.onGround) {
+				if (!this.isOnGround()) {
 					breakingSpeed /= 5.0F;
 				}
 			}
@@ -93,5 +89,21 @@ public abstract class MixinPlayerEntity extends LivingEntity {
 
 			ci.setReturnValue(breakingSpeed);
 		}
+	}
+
+	@Inject(method = "getBlockInteractionRange", at = @At("RETURN"), cancellable = true)
+	private void getBlockInteractionRange(CallbackInfoReturnable<Double> ci) {
+		EventReach event = new EventReach(ci.getReturnValueD());
+		BleachHack.eventBus.post(event);
+
+		ci.setReturnValue(event.getReach());
+	}
+
+	@Inject(method = "getEntityInteractionRange", at = @At("RETURN"), cancellable = true)
+	private void getEntityInteractionRange(CallbackInfoReturnable<Double> ci) {
+		EventReach event = new EventReach(ci.getReturnValueD());
+		BleachHack.eventBus.post(event);
+
+		ci.setReturnValue(event.getReach());
 	}
 }

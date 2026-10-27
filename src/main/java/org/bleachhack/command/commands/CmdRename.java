@@ -13,6 +13,7 @@ import org.bleachhack.command.Command;
 import org.bleachhack.command.CommandCategory;
 import org.bleachhack.util.BleachLogger;
 
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
@@ -30,9 +31,9 @@ public class CmdRename extends Command {
 			return;
 		}
 
-		ItemStack i = mc.player.getInventory().getMainHandStack();
+		ItemStack i = mc.player.getMainHandStack();
 
-		i.setCustomName(Text.literal(StringUtils.join(args, ' ').replace("&", "\u00a7").replace("\u00a7\u00a7", "&")));
+		i.set(DataComponentTypes.CUSTOM_NAME, Text.literal(StringUtils.join(args, ' ').replace("&", "\u00a7").replace("\u00a7\u00a7", "&")));
 		BleachLogger.info("Renamed Item");
 	}
 

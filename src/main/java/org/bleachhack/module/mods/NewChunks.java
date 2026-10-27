@@ -39,7 +39,7 @@ public class NewChunks extends Module {
 			(cp, chunk) -> {
 				if (!newChunks.contains(cp) && mc.world.getChunkManager().getChunk(cp.x, cp.z) == null) {
 					for (int x = 0; x < 16; x++) {
-						for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
+						for (int y = mc.world.getBottomY(); y < mc.world.getHeight(); y++) {
 							for (int z = 0; z < 16; z++) {
 								FluidState fluid = chunk.getFluidState(x, y, z);
 								

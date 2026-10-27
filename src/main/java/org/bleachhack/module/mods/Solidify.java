@@ -68,8 +68,8 @@ public class Solidify extends Module {
 		if (getSetting(7).asToggle().getState()) {
 			if (event.getPacket() instanceof VehicleMoveC2SPacket) {
 				VehicleMoveC2SPacket packet = (VehicleMoveC2SPacket) event.getPacket();
-				if (!mc.world.getChunkManager().isChunkLoaded((int) packet.getX() >> 4, (int) packet.getZ() >> 4)) {
-					mc.player.getVehicle().updatePosition(mc.player.getVehicle().prevX, mc.player.getVehicle().prevY, mc.player.getVehicle().prevZ);
+				if (!mc.world.getChunkManager().isChunkLoaded((int) packet.position().x >> 4, (int) packet.position().z >> 4)) {
+					mc.player.getVehicle().updatePosition(mc.player.getVehicle().lastX, mc.player.getVehicle().lastY, mc.player.getVehicle().lastZ);
 					event.setCancelled(true);
 				}
 			} else if (event.getPacket() instanceof PlayerMoveC2SPacket) {

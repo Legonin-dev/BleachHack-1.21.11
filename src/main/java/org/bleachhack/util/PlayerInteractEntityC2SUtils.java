@@ -13,6 +13,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.Vec3d;
 
 /* Mojang how */
 /* HOW */
@@ -20,17 +22,32 @@ public class PlayerInteractEntityC2SUtils {
 
 	public static Entity getEntity(PlayerInteractEntityC2SPacket packet) {
 		PacketByteBuf packetBuf = new PacketByteBuf(Unpooled.buffer());
-		packet.write(packetBuf);
+		PlayerInteractEntityC2SPacket.CODEC.encode(packetBuf, packet);
 
 		return MinecraftClient.getInstance().world.getEntityById(packetBuf.readVarInt());
 	}
 	
 	public static InteractType getInteractType(PlayerInteractEntityC2SPacket packet) {
-		PacketByteBuf packetBuf = new PacketByteBuf(Unpooled.buffer());
-		packet.write(packetBuf);
+		InteractType[] type = { null };
+		packet.handle(new PlayerInteractEntityC2SPacket.Handler() {
 
-		packetBuf.readVarInt();
-		return packetBuf.readEnumConstant(InteractType.class);
+			@Override
+			public void interact(Hand hand) {
+				type[0] = InteractType.INTERACT;
+			}
+
+			@Override
+			public void interactAt(Hand hand, Vec3d pos) {
+				type[0] = InteractType.INTERACT_AT;
+			}
+
+			@Override
+			public void attack() {
+				type[0] = InteractType.ATTACK;
+			}
+		});
+
+		return type[0];
 	}
 
 	public enum InteractType {

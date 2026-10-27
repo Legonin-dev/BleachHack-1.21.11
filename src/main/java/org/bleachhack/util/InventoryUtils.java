@@ -48,8 +48,8 @@ public class InventoryUtils {
 	public static Hand selectSlot(int slot) {
 		if (slot >= 0 && slot <= 36) {
 			if (slot < 9) {
-				if (slot != mc.player.getInventory().selectedSlot) {
-					mc.player.getInventory().selectedSlot = slot;
+				if (slot != mc.player.getInventory().getSelectedSlot()) {
+					mc.player.getInventory().setSelectedSlot(slot);
 					mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
 				}
 
@@ -59,8 +59,8 @@ public class InventoryUtils {
 					if (mc.player.getInventory().getStack(i).isEmpty()) {
 						mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, 0, SlotActionType.QUICK_MOVE, mc.player);
 
-						if (i != mc.player.getInventory().selectedSlot) {
-							mc.player.getInventory().selectedSlot = i;
+						if (i != mc.player.getInventory().getSelectedSlot()) {
+							mc.player.getInventory().setSelectedSlot(i);
 							mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(i));
 						}
 
@@ -69,7 +69,7 @@ public class InventoryUtils {
 				}
 
 				mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, 0, SlotActionType.PICKUP, mc.player);
-				mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
+				mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().getSelectedSlot(), 0, SlotActionType.PICKUP, mc.player);
 				mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, 0, SlotActionType.PICKUP, mc.player);
 				return Hand.MAIN_HAND;
 			}
@@ -84,11 +84,11 @@ public class InventoryUtils {
 		int[] i = new int[offhand ? 38 : 37];
 		
 		// Add hand slots first
-		i[0] = mc.player.getInventory().selectedSlot;
+		i[0] = mc.player.getInventory().getSelectedSlot();
 		i[1] = 40;
 
 		for (int j = 0; j < 36; j++) {
-			if (j != mc.player.getInventory().selectedSlot) {
+			if (j != mc.player.getInventory().getSelectedSlot()) {
 				i[offhand ? j + 2 : j + 1] = j;
 			}
 		}

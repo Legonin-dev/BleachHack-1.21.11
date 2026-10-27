@@ -115,7 +115,7 @@ public class AutoSteal extends Module {
 						boolean openSlot = InventoryUtils.getSlot(false, j -> mc.player.getInventory().getStack(j).isEmpty()
 								|| (mc.player.getInventory().getStack(j).isStackable()
 										&& mc.player.getInventory().getStack(j).getCount() < mc.player.getInventory().getStack(j).getMaxCount()
-										&& currentItems.get(fi).isItemEqual(mc.player.getInventory().getStack(j)))) != 1;
+										&& ItemStack.areItemsAndComponentsEqual(currentItems.get(fi), mc.player.getInventory().getStack(j)))) != 1;
 
 						if (openSlot) {
 							mc.interactionManager.clickSlot(currentSyncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
@@ -234,15 +234,15 @@ public class AutoSteal extends Module {
 		if (event.getPacket() instanceof InventoryS2CPacket) {
 			InventoryS2CPacket packet = (InventoryS2CPacket) event.getPacket();
 
-			if ((lastOpen - currentTime >= 2 || currentItems == null) && packet.getContents().size() == 63 || packet.getContents().size() == 90) {
-				currentItems = packet.getContents().subList(0, packet.getContents().size() - 36);
+			if ((lastOpen - currentTime >= 2 || currentItems == null) && packet.contents().size() == 63 || packet.contents().size() == 90) {
+				currentItems = packet.contents().subList(0, packet.contents().size() - 36);
 				//currentSyncId = -1;
 			}
 		} else if (currentItems != null && event.getPacket() instanceof ScreenHandlerSlotUpdateS2CPacket) {
 			ScreenHandlerSlotUpdateS2CPacket packet = (ScreenHandlerSlotUpdateS2CPacket) event.getPacket();
 
 			if (packet.getSyncId() == currentSyncId && packet.getSlot() >= 0 && packet.getSlot() < currentItems.size()) {
-				currentItems.set(packet.getSlot(), packet.getItemStack());
+				currentItems.set(packet.getSlot(), packet.getStack());
 			}
 		}
 	}

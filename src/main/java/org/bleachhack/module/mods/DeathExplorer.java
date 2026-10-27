@@ -34,7 +34,7 @@ public class DeathExplorer extends Module {
 	public void onDisable(boolean inWorld) {
 		if (dead && inWorld) {
 			mc.player.setHealth(0f);
-			mc.setScreen(new DeathScreen(null, mc.world.getLevelProperties().isHardcore()));
+			mc.setScreen(new DeathScreen(null, mc.world.getLevelProperties().isHardcore(), mc.player));
 		}
 
 		dead = false;
@@ -54,7 +54,7 @@ public class DeathExplorer extends Module {
 	public void onRenderInGameHud(EventRenderInGameHud event) {
 		if (getSetting(0).asToggle().getState()) {
 			int length = mc.textRenderer.getWidth("You are in dead");
-			mc.textRenderer.drawWithShadow(event.getMatrix(), "You are dead", mc.getWindow().getScaledWidth() / 2 - length / 2, 10, 0xcc4040);
+			event.getContext().drawTextWithShadow(mc.textRenderer, "You are dead", mc.getWindow().getScaledWidth() / 2 - length / 2, 10, 0xFFcc4040);
 		}
 	}
 

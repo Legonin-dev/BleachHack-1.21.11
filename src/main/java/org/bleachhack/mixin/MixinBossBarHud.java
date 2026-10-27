@@ -15,13 +15,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.BossBarHud;
 
 @Mixin(BossBarHud.class)
 public class MixinBossBarHud {
 
 	@Inject(method = "render", at = @At("HEAD"), cancellable = true)
-	private void render(CallbackInfo info) {
+	private void render(DrawContext context, CallbackInfo info) {
 		if (ModuleManager.getModule(NoRender.class).isOverlayToggled(6)) {
 			info.cancel();
 		}

@@ -46,7 +46,7 @@ public class PacketFly extends Module {
 
 		super.onEnable(inWorld);
 
-		cachedPos = mc.player.getRootVehicle().getPos();
+		cachedPos = mc.player.getRootVehicle().getEntityPos();
 	}
 
 	@BleachSubscribe
@@ -65,8 +65,6 @@ public class PacketFly extends Module {
 		if (event.getPacket() instanceof PlayerPositionLookS2CPacket) {
 			PlayerPositionLookS2CPacket p = (PlayerPositionLookS2CPacket) event.getPacket();
 
-			p.yaw = mc.player.getYaw();
-			p.pitch = mc.player.getPitch();
 
 			if (getSetting(4).asToggle().getState()) {
 				event.setCancelled(true);
@@ -85,7 +83,7 @@ public class PacketFly extends Module {
 		if (event.getPacket() instanceof PlayerMoveC2SPacket.Full) {
 			event.setCancelled(true);
 			PlayerMoveC2SPacket p = (PlayerMoveC2SPacket) event.getPacket();
-			mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(p.getX(0), p.getY(0), p.getZ(0), p.isOnGround()));
+			mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(p.getX(0), p.getY(0), p.getZ(0), p.isOnGround(), false));
 		}
 	}
 
@@ -101,22 +99,22 @@ public class PacketFly extends Module {
 		Vec3d forward = new Vec3d(0, 0, hspeed).rotateY(-(float) Math.toRadians(mc.player.getYaw()));
 		Vec3d moveVec = Vec3d.ZERO;
 
-		if (mc.player.input.pressingForward) {
+		if (mc.player.input.playerInput.forward()) {
 			moveVec = moveVec.add(forward);
 		}
-		if (mc.player.input.pressingBack) {
+		if (mc.player.input.playerInput.backward()) {
 			moveVec = moveVec.add(forward.negate());
 		}
-		if (mc.player.input.jumping) {
+		if (mc.player.input.playerInput.jump()) {
 			moveVec = moveVec.add(0, vspeed, 0);
 		}
-		if (mc.player.input.sneaking) {
+		if (mc.player.input.playerInput.sneak()) {
 			moveVec = moveVec.add(0, -vspeed, 0);
 		}
-		if (mc.player.input.pressingLeft) {
+		if (mc.player.input.playerInput.left()) {
 			moveVec = moveVec.add(forward.rotateY((float) Math.toRadians(90)));
 		}
-		if (mc.player.input.pressingRight) {
+		if (mc.player.input.playerInput.right()) {
 			moveVec = moveVec.add(forward.rotateY((float) -Math.toRadians(90)));
 		}
 
@@ -132,10 +130,10 @@ public class PacketFly extends Module {
 			//target.noClip = true;
 			target.updatePositionAndAngles(cachedPos.x, cachedPos.y, cachedPos.z, mc.player.getYaw(), mc.player.getPitch());
 			if (target != mc.player) {
-				mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(target));
+				mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(target));
 			} else {
-				mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(cachedPos.x, cachedPos.y, cachedPos.z, false));
-				mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(cachedPos.x, cachedPos.y - 0.01, cachedPos.z, true));
+				mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(cachedPos.x, cachedPos.y, cachedPos.z, false, false));
+				mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(cachedPos.x, cachedPos.y - 0.01, cachedPos.z, true, false));
 			}
 		} else if (getSetting(0).asMode().getMode() == 1) {
 			//moveVec = Vec3d.ZERO;
@@ -156,10 +154,10 @@ public class PacketFly extends Module {
 			}
 
 			mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-					mc.player.getX() + moveVec.x, mc.player.getY() + moveVec.y, mc.player.getZ() + moveVec.z, false));
+					mc.player.getX() + moveVec.x, mc.player.getY() + moveVec.y, mc.player.getZ() + moveVec.z, false, false));
 
 			mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-					mc.player.getX() + moveVec.x, mc.player.getY() - 420.69, mc.player.getZ() + moveVec.z, true));
+					mc.player.getX() + moveVec.x, mc.player.getY() - 420.69, mc.player.getZ() + moveVec.z, true, false));
 		}
 	}
 

@@ -10,17 +10,17 @@ package org.bleachhack.event.events;
 
 import org.bleachhack.event.Event;
 
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 
 public class EventRenderInGameHud extends Event {
 
-	private MatrixStack matrices;
+	private DrawContext context;
 
-	public EventRenderInGameHud(MatrixStack matrices) {
-		this.matrices = matrices;
+	public EventRenderInGameHud(DrawContext context) {
+		this.context = context;
 	}
 
-	public MatrixStack getMatrix() {
-		return matrices;
+	public DrawContext getContext() {
+		return context;
 	}
 }

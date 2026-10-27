@@ -33,9 +33,9 @@ public class PlaceDirOperation extends PlaceOperation {
 	}
 
 	public static OperationBlueprint blueprint(int localX, int localY, int localZ, Direction localDir, Item... items) {
-		int horizontal = (localDir.getHorizontal() + 1) % 4;
+		int horizontal = (localDir.getHorizontalQuarterTurns() + 1) % 4;
 		return (origin, dir) -> new PlaceDirOperation(origin.add(rotate(localX, localY, localZ, dir)),
-				localDir.getAxis() == Axis.Y ? localDir : Direction.fromHorizontal(Math.floorMod(dir.getHorizontal() - horizontal, 4)), items);
+				localDir.getAxis() == Axis.Y ? localDir : Direction.fromHorizontalQuarterTurns(Math.floorMod(dir.getHorizontalQuarterTurns() - horizontal, 4)), items);
 	}
 
 	@Override

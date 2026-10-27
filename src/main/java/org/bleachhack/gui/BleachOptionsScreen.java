@@ -17,7 +17,7 @@ import org.bleachhack.gui.window.widget.WindowWidget;
 import org.bleachhack.setting.option.Option;
 
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.HoverEvent;
@@ -84,7 +84,7 @@ public class BleachOptionsScreen extends WindowScreen {
 
 			// Name text (at the end because of... reasons)
 			getWindow(window).addWidget(new WindowTextWidget(
-					Text.literal(entry.getName()).styled(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(entry.getTooltip())))),
+					Text.literal(entry.getName()).styled(s -> s.withHoverEvent(new HoverEvent.ShowText(Text.literal(entry.getTooltip())))),
 					true, x - 107, y, 0xffffff));
 
 
@@ -95,9 +95,7 @@ public class BleachOptionsScreen extends WindowScreen {
 	}
 
 	@Override
-	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		this.renderBackground(matrices);
-
+	public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		int offset = scrollbar.getOffsetSinceRender();
 		for (WindowWidget widget: getWindow(0).getWidgets()) {
 			if (!(widget instanceof WindowScrollbarWidget)) {
@@ -106,14 +104,14 @@ public class BleachOptionsScreen extends WindowScreen {
 			}
 		}
 
-		super.render(matrices, mouseX, mouseY, delta);
+		super.render(ctx, mouseX, mouseY, delta);
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-		scrollbar.moveScrollbar((int) -amount * 7);
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+		scrollbar.moveScrollbar((int) -verticalAmount * 7);
 
-		return super.mouseScrolled(mouseX, mouseY, amount);
+		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
 	@Override

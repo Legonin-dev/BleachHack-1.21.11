@@ -13,7 +13,6 @@ import org.bleachhack.eventbus.BleachSubscribe;
 import org.bleachhack.module.Module;
 import org.bleachhack.module.ModuleCategory;
 
-import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.SlotActionType;
@@ -33,13 +32,13 @@ public class ElytraReplace extends Module {
 
 		int chestSlot = 38;
 		ItemStack chest = mc.player.getInventory().getStack(chestSlot);
-		if (chest.getItem() instanceof ElytraItem && chest.getDamage() == (Items.ELYTRA.getMaxDamage() - 1)) {
+		if (chest.isOf(Items.ELYTRA) && chest.getDamage() == (chest.getMaxDamage() - 1)) {
 			// search inventory for elytra
 
 			Integer elytraSlot = null;
 			for (int slot = 0; slot < 36; slot++) {
 				ItemStack stack = mc.player.getInventory().getStack(slot);
-				if (stack.getItem() instanceof ElytraItem && stack.getDamage() != (Items.ELYTRA.getMaxDamage() - 1)) {
+				if (stack.isOf(Items.ELYTRA) && stack.getDamage() != (chest.getMaxDamage() - 1)) {
 					elytraSlot = slot;
 					break;
 				}

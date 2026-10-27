@@ -8,15 +8,14 @@
  */
 package org.bleachhack.util.auth;
 
-import java.net.Proxy;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -27,12 +26,9 @@ import org.bleachhack.util.io.BleachOnlineMang;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.authlib.Agent;
 import com.mojang.authlib.exceptions.AuthenticationException;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 
-import net.minecraft.client.util.Session;
+import net.minecraft.client.session.Session;
 
 public final class LoginHelper {
 
@@ -46,28 +42,9 @@ public final class LoginHelper {
 	private static final Pattern MS_ACCESS_TOKEN_PATTERN = Pattern.compile("accessToken=(.*?)(&|$)");
 
 	public static Session createMojangSession(String email, String password) throws AuthenticationException {
-		YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(
-				Proxy.NO_PROXY, "").createUserAuthentication(Agent.MINECRAFT);
-
-		auth.setUsername(email);
-		auth.setPassword(password);
-
-		try {
-			auth.logIn();
-		} catch (AuthenticationException e) {
-			if (e.getMessage().toLowerCase(Locale.ENGLISH).contains("credentials"))
-				throw new AuthenticationException("Invalid Password!");
-
-			if (e.getMessage().toLowerCase(Locale.ENGLISH).contains("410"))
-				throw new AuthenticationException("Account Migrated, Use Microsoft Login.");
-
-			throw e;
-		}
-
-		return new Session(auth.getSelectedProfile().getName(),
-				auth.getSelectedProfile().getId().toString(),
-				auth.getAuthenticatedToken(),
-				Optional.empty(), Optional.empty(), Session.AccountType.MOJANG);
+		// Legacy Mojang authentication has been shut down and authlib 7 no longer
+		// ships YggdrasilUserAuthentication.
+		throw new AuthenticationException("Mojang login is no longer supported, use Microsoft login.");
 	}
 
 	public static Session createMicrosoftSession(String email, String password) throws AuthenticationException {
@@ -178,7 +155,7 @@ public final class LoginHelper {
 		if (id.length() == 32)
 			id = id.substring(0, 8) + "-" + id.substring(8, 12) + "-" + id.substring(12, 16) + "-" + id.substring(16, 20) + "-" + id.substring(20);
 
-		return new Session(profileJson.get("name").getAsString(), id, mcToken, Optional.empty(), Optional.empty(), Session.AccountType.MSA);
+		return new Session(profileJson.get("name").getAsString(), UUID.fromString(id), mcToken, Optional.empty(), Optional.empty());
 	}
 
 	private static void throwIfInvalid(HttpResponse<?> response, boolean checkStatus, String reason) throws AuthenticationException {

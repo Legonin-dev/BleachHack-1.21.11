@@ -34,7 +34,7 @@ public class OffhandCrash extends Module {
 		for (int i = 0; i < getSetting(0).asSlider().getValue(); i++) {
 			mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.DOWN));
 			if (getSetting(1).asToggle().getState())
-				mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+				mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, false));
 		}
 	}
 }

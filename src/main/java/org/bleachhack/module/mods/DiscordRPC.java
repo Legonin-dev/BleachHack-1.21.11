@@ -102,6 +102,10 @@ public class DiscordRPC extends Module {
 			connectFuture = null;
 		}
 
+		if (client.getStatus() != PipeStatus.CONNECTED) {
+			return;
+		}
+
 		boolean silent = getSetting(3).asToggle().getState();
 		if (silent != lastSilent) {
 			disconnect();
@@ -112,22 +116,22 @@ public class DiscordRPC extends Module {
 
 		if (tick % 40 == 0) {
 			RichPresence.Builder builder = new RichPresence.Builder()
-					.setLargeImage(silent ? "mc" : "bh", silent ? "Minecraft " + SharedConstants.getGameVersion().getName() : "BleachHack " + BleachHack.VERSION);
+					.setLargeImage(silent ? "mc" : "bh", silent ? "Minecraft " + SharedConstants.getGameVersion().name() : "BleachHack " + BleachHack.VERSION);
 
 			// Top text
 			builder.setDetails(switch (getSetting(0).asMode().getMode()) {
 				case 0 ->"Playing " + (mc.getCurrentServerEntry() == null ? "Singleplayer" : mc.getCurrentServerEntry().address);
 				case 1 -> mc.getCurrentServerEntry() == null ? "Singleplayer" : mc.getCurrentServerEntry().address;
 				case 2 -> mc.getCurrentServerEntry() == null ? "Singleplayer" : "Multiplayer";
-				case 3 -> mc.player.getEntityName() + " Ontop!";
-				case 4 -> "Minecraft " + SharedConstants.getGameVersion().getName();
-				case 5 -> mc.player.getEntityName();
+				case 3 -> mc.player.getName().getString() + " Ontop!";
+				case 4 -> "Minecraft " + SharedConstants.getGameVersion().name();
+				case 5 -> mc.player.getName().getString();
 				case 6 -> "<- bad client";
 				default -> customText1;
 			});
 
 			// Bottom text
-			ItemStack currentItem = mc.player.getInventory().getMainHandStack();
+			ItemStack currentItem = mc.player.getMainHandStack();
 
 			String customName = StringUtils.strip(currentItem.getName().getString());
 			if (customName.length() > 25) {
@@ -137,11 +141,11 @@ public class DiscordRPC extends Module {
 			String name = currentItem.getItem().getName().getString();
 			String itemName = currentItem.isEmpty() ? "Nothing"
 					: (currentItem.getCount() > 1 ? currentItem.getCount() + " " : "")
-					+ (currentItem.hasCustomName() ? customName : name);
+					+ (currentItem.contains(net.minecraft.component.DataComponentTypes.CUSTOM_NAME) ? customName : name);
 
 			builder.setState(switch (getSetting(1).asMode().getMode()) {
 				case 0 -> (int) mc.player.getHealth() + " hp - Holding " + itemName;
-				case 1 -> mc.player.getEntityName() + " - " + (int) mc.player.getHealth() + " hp";
+				case 1 -> mc.player.getName().getString() + " - " + (int) mc.player.getHealth() + " hp";
 				case 2 -> "Holding " + itemName;
 				case 3 -> (int) mc.player.getHealth() + " hp - At " + mc.player.getBlockPos().toShortString();
 				case 4 -> "At " + mc.player.getBlockPos().toShortString();

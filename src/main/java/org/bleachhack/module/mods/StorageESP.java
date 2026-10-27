@@ -8,30 +8,20 @@
  */
 package org.bleachhack.module.mods;
 
-import com.google.gson.JsonSyntaxException;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.entity.vehicle.FurnaceMinecartEntity;
 import net.minecraft.entity.vehicle.HopperMinecartEntity;
 import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Direction.Axis;
-import net.minecraft.util.math.random.Random;
 
-import org.bleachhack.event.events.EventEntityRender;
 import org.bleachhack.event.events.EventWorldRender;
 import org.bleachhack.eventbus.BleachSubscribe;
 import org.bleachhack.module.Module;
@@ -39,24 +29,15 @@ import org.bleachhack.module.ModuleCategory;
 import org.bleachhack.setting.module.SettingMode;
 import org.bleachhack.setting.module.SettingSlider;
 import org.bleachhack.setting.module.SettingToggle;
-import org.bleachhack.util.BleachLogger;
 import org.bleachhack.util.Boxes;
 import org.bleachhack.util.render.Renderer;
 import org.bleachhack.util.render.color.QuadColor;
-import org.bleachhack.util.shader.BleachCoreShaders;
-import org.bleachhack.util.shader.ColorVertexConsumerProvider;
-import org.bleachhack.util.shader.ShaderEffectWrapper;
-import org.bleachhack.util.shader.ShaderLoader;
 import org.bleachhack.util.world.WorldUtils;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 public class StorageESP extends Module {
-
-	private ShaderEffectWrapper shader;
-	private ColorVertexConsumerProvider colorVertexer;
 
 	public StorageESP() {
 		super("StorageESP", KEY_UNBOUND, ModuleCategory.RENDER, "Highlights storage containers in the world.",
@@ -77,111 +58,51 @@ public class StorageESP extends Module {
 				new SettingToggle("HopperCarts", true).withDesc("Highlights hoppers in minecarts."),
 				new SettingToggle("Itemframes", true).withDesc("Highlights item frames."));
 		
-		try {
-			shader = new ShaderEffectWrapper(
-					ShaderLoader.loadEffect(mc.getFramebuffer(), new Identifier("bleachhack", "shaders/post/entity_outline.json")));
-
-			colorVertexer = new ColorVertexConsumerProvider(shader.getFramebuffer("main"), BleachCoreShaders::getColorOverlayShader);
-		} catch (JsonSyntaxException | IOException e) {
-			throw new RuntimeException("Failed to initialize StorageESP Shader! loaded too early?", e);
-		}
-	}
-
-	@BleachSubscribe
-	public void onWorldRender(EventWorldRender.Pre event) {
-		shader.prepare();
-		shader.clearFramebuffer("main");
-	}
-
-	@BleachSubscribe
-	public void onEntityRender(EventEntityRender.Single.Pre event) {
-		if (getSetting(0).asMode().getMode() != 0)
-			return;
-
-		int[] color = getColorForEntity(event.getEntity());
-
-		if (color != null) {
-			event.setVertex(colorVertexer.createDualProvider(event.getVertex(), color[0], color[1], color[2], getSetting(1).asSlider().getValueInt()));
-		}
 	}
 
 	@BleachSubscribe
 	public void onWorldRender(EventWorldRender.Post event) {
-		if (getSetting(0).asMode().getMode() == 0) {
-			// Manually render blockentities because of culling
-			for (BlockEntity be: WorldUtils.getBlockEntities()) {
-				int[] color = getColorForBlock(be);
+		float width = getSetting(2).asSlider().getValueFloat();
+		int fill = getSetting(0).asMode().getMode() == 0 ? getSetting(1).asSlider().getValueInt() : getSetting(3).asSlider().getValueInt();
 
-				if (color != null) {
-					BlockEntityRenderer<BlockEntity> renderer = mc.getBlockEntityRenderDispatcher().get(be);
-					MatrixStack matrices = Renderer.matrixFrom(be.getPos().getX(), be.getPos().getY(), be.getPos().getZ());
-					try {
-						if (renderer != null) {
-							renderer.render(be, mc.getTickDelta(), matrices,
-									colorVertexer.createSingleProvider(mc.getBufferBuilders().getEntityVertexConsumers(), color[0], color[1], color[2], getSetting(1).asSlider().getValueInt()),
-									LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
-						} else {
-							BlockState state = be.getCachedState();
-							mc.getBlockRenderManager().getModelRenderer().renderFlat(mc.world,
-									mc.getBlockRenderManager().getModel(state), state, be.getPos(), matrices,
-									colorVertexer.createSingleProvider(mc.getBufferBuilders().getEntityVertexConsumers(), color[0], color[1], color[2], getSetting(1).asSlider().getValueInt()).getBuffer(RenderLayers.getMovingBlockLayer(state)),
-									false, Random.create(0L), 0L, OverlayTexture.DEFAULT_UV);
-						}
-					} catch (Exception e) {
-						BleachLogger.error("Disabling StorageESP, another mod conflicting with shader mode?");
-						e.printStackTrace();
-						setEnabled(false);
-						return;
-					}
-				}
+		for (Entity e: mc.world.getEntities()) {
+			int[] color = getColorForEntity(e);
+			Box box = e.getBoundingBox();
+
+			if (e instanceof ItemFrameEntity && ((ItemFrameEntity) e).getHeldItemStack().getItem() == Items.FILLED_MAP) {
+				Axis axis = e.getHorizontalFacing().getAxis();
+				box = box.expand(axis == Axis.X ? 0 : 0.125, axis == Axis.Y ? 0 : 0.125, axis == Axis.Z ? 0 : 0.125);
 			}
 
-			colorVertexer.draw();
-			shader.render();
-			shader.drawFramebufferToMain("main");
-		} else {
-			float width = getSetting(2).asSlider().getValueFloat();
-			int fill = getSetting(3).asSlider().getValueInt();
+			if (color != null) {
+				if (width != 0)
+					Renderer.drawBoxOutline(box, QuadColor.single(color[0], color[1], color[2], 255), width);
 
-			for (Entity e: mc.world.getEntities()) {
-				int[] color = getColorForEntity(e);
-				Box box = e.getBoundingBox();
+				if (fill != 0)
+					Renderer.drawBoxFill(box, QuadColor.single(color[0], color[1], color[2], fill));
+			}
+		}
 
-				if (e instanceof ItemFrameEntity && ((ItemFrameEntity) e).getHeldItemStack().getItem() == Items.FILLED_MAP) {
-					Axis axis = e.getHorizontalFacing().getAxis();
-					box = box.expand(axis == Axis.X ? 0 : 0.125, axis == Axis.Y ? 0 : 0.125, axis == Axis.Z ? 0 : 0.125);
-				}
+		Set<BlockPos> skip = new HashSet<>();
+		for (BlockEntity be: WorldUtils.getBlockEntities()) {
+			if (skip.contains(be.getPos()))
+				continue;
 
-				if (color != null) {
-					if (width != 0)
-						Renderer.drawBoxOutline(box, QuadColor.single(color[0], color[1], color[2], 255), width);
+			int[] color = getColorForBlock(be);
+			Box box = be.getCachedState().getOutlineShape(mc.world, be.getPos()).getBoundingBox().offset(be.getPos());
 
-					if (fill != 0)
-						Renderer.drawBoxFill(box, QuadColor.single(color[0], color[1], color[2], fill));
-				}
+			Direction dir = getChestDirection(be);
+			if (dir != null) {
+				box = Boxes.stretch(box, dir, 0.94);
+				skip.add(be.getPos().offset(dir));
 			}
 
-			Set<BlockPos> skip = new HashSet<>();
-			for (BlockEntity be: WorldUtils.getBlockEntities()) {
-				if (skip.contains(be.getPos()))
-					continue;
+			if (color != null) {
+				if (width != 0)
+					Renderer.drawBoxOutline(box, QuadColor.single(color[0], color[1], color[2], 255), width);
 
-				int[] color = getColorForBlock(be);
-				Box box = be.getCachedState().getOutlineShape(mc.world, be.getPos()).getBoundingBox().offset(be.getPos());
-
-				Direction dir = getChestDirection(be);
-				if (dir != null) {
-					box = Boxes.stretch(box, dir, 0.94);
-					skip.add(be.getPos().offset(dir));
-				}
-
-				if (color != null) {
-					if (width != 0)
-						Renderer.drawBoxOutline(box, QuadColor.single(color[0], color[1], color[2], 255), width);
-
-					if (fill != 0)
-						Renderer.drawBoxFill(box, QuadColor.single(color[0], color[1], color[2], fill));
-				}
+				if (fill != 0)
+					Renderer.drawBoxFill(box, QuadColor.single(color[0], color[1], color[2], fill));
 			}
 		}
 	}

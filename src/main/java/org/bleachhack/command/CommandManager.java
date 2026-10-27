@@ -114,7 +114,7 @@ public class CommandManager {
 
 					BleachLogger.info(
 							text.styled(style -> style
-									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, c.getHelpTooltip()))));
+									.withHoverEvent(new HoverEvent.ShowText(c.getHelpTooltip()))));
 				} catch (Exception e) {
 					e.printStackTrace();
 

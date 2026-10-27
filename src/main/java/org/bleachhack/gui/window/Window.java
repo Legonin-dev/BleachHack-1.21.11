@@ -13,19 +13,12 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import org.bleachhack.gui.window.widget.WindowWidget;
-
-import com.mojang.blaze3d.systems.RenderSystem;
+import org.bleachhack.util.render.RenderUtils;
+import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -72,8 +65,10 @@ public class Window {
 		return widget;
 	}
 
-	public void render(MatrixStack matrices, int mouseX, int mouseY) {
+	public void render(DrawContext ctx, int mouseX, int mouseY) {
 		TextRenderer textRend = MinecraftClient.getInstance().textRenderer;
+
+		checkMouseRelease();
 
 		if (dragging) {
 			x2 = (x2 - x1) + mouseX - dragOffX - Math.min(0, mouseX - dragOffX);
@@ -82,11 +77,11 @@ public class Window {
 			y1 = Math.max(0, mouseY - dragOffY);
 		}
 
-		drawBackground(matrices, mouseX, mouseY, textRend);
+		drawBackground(ctx, mouseX, mouseY, textRend);
 
 		for (WindowWidget w : widgets) {
 			if (w.shouldRender(x1, y1, x2, y2)) {
-				w.render(matrices, x1, y1, mouseX, mouseY);
+				w.render(ctx, x1, y1, mouseX, mouseY);
 			}
 		}
 
@@ -94,41 +89,38 @@ public class Window {
 
 		/* window icon */
 		if (icon != null) {
-			RenderSystem.getModelViewStack().push();
-			RenderSystem.getModelViewStack().translate(x1 + (blockItem ? 3 : 2), y1 + 2, 0);
-			RenderSystem.getModelViewStack().scale(0.6f, 0.6f, 1f);
+			ctx.getMatrices().pushMatrix();
+			ctx.getMatrices().translate(x1 + (blockItem ? 3 : 2), y1 + 2);
+			ctx.getMatrices().scale(0.6f, 0.6f);
 
-			DiffuseLighting.enableGuiDepthLighting();
-			MinecraftClient.getInstance().getItemRenderer().renderInGuiWithOverrides(matrices, icon, 0, 0);
-			DiffuseLighting.disableGuiDepthLighting();
+			ctx.drawItem(icon, 0, 0);
 
-			RenderSystem.getModelViewStack().pop();
-			RenderSystem.applyModelViewMatrix();
+			ctx.getMatrices().popMatrix();
 		}
 
 		/* window title */
-		textRend.drawWithShadow(matrices, title,
+		ctx.drawTextWithShadow(textRend, title,
 				x1 + (icon == null || icon.getItem() == Items.AIR ? 4 : (blockItem ? 15 : 14)), y1 + 3, -1);
 	}
 
-	protected void drawBackground(MatrixStack matrices, int mouseX, int mouseY, TextRenderer textRend) {
+	protected void drawBackground(DrawContext ctx, int mouseX, int mouseY, TextRenderer textRend) {
 		/* background */
-		DrawableHelper.fill(matrices, x1, y1 + 1, x1 + 1, y2 - 1, 0xff6060b0);
-		horizontalGradient(matrices, x1 + 1, y1, x2 - 1, y1 + 1, 0xff6060b0, 0xff8070b0);
-		DrawableHelper.fill(matrices, x2 - 1, y1 + 1, x2, y2 - 1, 0xff8070b0);
-		horizontalGradient(matrices, x1 + 1, y2 - 1, x2 - 1, y2, 0xff6060b0, 0xff8070b0);
+		ctx.fill(x1, y1 + 1, x1 + 1, y2 - 1, 0xff6060b0);
+		horizontalGradient(ctx, x1 + 1, y1, x2 - 1, y1 + 1, 0xff6060b0, 0xff8070b0);
+		ctx.fill(x2 - 1, y1 + 1, x2, y2 - 1, 0xff8070b0);
+		horizontalGradient(ctx, x1 + 1, y2 - 1, x2 - 1, y2, 0xff6060b0, 0xff8070b0);
 
-		DrawableHelper.fill(matrices, x1 + 1, y1 + 12, x2 - 1, y2 - 1, 0x90606090);
+		ctx.fill(x1 + 1, y1 + 12, x2 - 1, y2 - 1, 0x90606090);
 
 		/* title bar */
-		horizontalGradient(matrices, x1 + 1, y1 + 1, x2 - 1, y1 + 12, (selected ? 0xff6060b0 : 0xff606060), (selected ? 0xff8070b0 : 0xffa0a0a0));
+		horizontalGradient(ctx, x1 + 1, y1 + 1, x2 - 1, y1 + 12, (selected ? 0xff6060b0 : 0xff606060), (selected ? 0xff8070b0 : 0xffa0a0a0));
 
 		/* buttons */
-		textRend.draw(matrices, "x", x2 - 10, y1 + 3, 0);
-		textRend.draw(matrices, "x", x2 - 11, y1 + 2, -1);
+		ctx.drawText(textRend, "x", x2 - 10, y1 + 3, RenderUtils.fixColor(0), false);
+		ctx.drawText(textRend, "x", x2 - 11, y1 + 2, -1, false);
 
-		textRend.draw(matrices, "_", x2 - 21, y1 + 2, 0);
-		textRend.draw(matrices, "_", x2 - 22, y1 + 1, -1);
+		ctx.drawText(textRend, "_", x2 - 21, y1 + 2, RenderUtils.fixColor(0), false);
+		ctx.drawText(textRend, "_", x2 - 22, y1 + 1, -1, false);
 	}
 
 	public boolean shouldClose(int mouseX, int mouseY) {
@@ -187,65 +179,64 @@ public class Window {
 		}
 	}
 
-	public static void fill(MatrixStack matrices, int x1, int y1, int x2, int y2) {
-		fill(matrices, x1, y1, x2, y2, 0xff6060b0, 0xff8070b0, 0x00000000);
+	public static void fill(DrawContext ctx, int x1, int y1, int x2, int y2) {
+		fill(ctx, x1, y1, x2, y2, 0xff6060b0, 0xff8070b0, 0x00000000);
 	}
 
-	public static void fill(MatrixStack matrices, int x1, int y1, int x2, int y2, int fill) {
-		fill(matrices, x1, y1, x2, y2, 0xff6060b0, 0xff8070b0, fill);
+	public static void fill(DrawContext ctx, int x1, int y1, int x2, int y2, int fill) {
+		fill(ctx, x1, y1, x2, y2, 0xff6060b0, 0xff8070b0, fill);
 	}
 
-	public static void fill(MatrixStack matrices, int x1, int y1, int x2, int y2, int colTop, int colBot, int colFill) {
-		DrawableHelper.fill(matrices, x1, y1 + 1, x1 + 1, y2 - 1, colTop);
-		DrawableHelper.fill(matrices, x1 + 1, y1, x2 - 1, y1 + 1, colTop);
-		DrawableHelper.fill(matrices, x2 - 1, y1 + 1, x2, y2 - 1, colBot);
-		DrawableHelper.fill(matrices, x1 + 1, y2 - 1, x2 - 1, y2, colBot);
-		DrawableHelper.fill(matrices, x1 + 1, y1 + 1, x2 - 1, y2 - 1, colFill);
+	public static void fill(DrawContext ctx, int x1, int y1, int x2, int y2, int colTop, int colBot, int colFill) {
+		ctx.fill(x1, y1 + 1, x1 + 1, y2 - 1, colTop);
+		ctx.fill(x1 + 1, y1, x2 - 1, y1 + 1, colTop);
+		ctx.fill(x2 - 1, y1 + 1, x2, y2 - 1, colBot);
+		ctx.fill(x1 + 1, y2 - 1, x2 - 1, y2, colBot);
+		ctx.fill(x1 + 1, y1 + 1, x2 - 1, y2 - 1, colFill);
 	}
 
-	public static void horizontalGradient(MatrixStack matrices, int x1, int y1, int x2, int y2, int color1, int color2) {
-		float alpha1 = (color1 >> 24 & 255) / 255.0F;
-		float red1   = (color1 >> 16 & 255) / 255.0F;
-		float green1 = (color1 >> 8 & 255) / 255.0F;
-		float blue1  = (color1 & 255) / 255.0F;
-		float alpha2 = (color2 >> 24 & 255) / 255.0F;
-		float red2   = (color2 >> 16 & 255) / 255.0F;
-		float green2 = (color2 >> 8 & 255) / 255.0F;
-		float blue2  = (color2 & 255) / 255.0F;
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder bufferBuilder = tessellator.getBuffer();
-		bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-		bufferBuilder.vertex(x1, y1, 0).color(red1, green1, blue1, alpha1).next();
-		bufferBuilder.vertex(x1, y2, 0).color(red1, green1, blue1, alpha1).next();
-		bufferBuilder.vertex(x2, y2, 0).color(red2, green2, blue2, alpha2).next();
-		bufferBuilder.vertex(x2, y1, 0).color(red2, green2, blue2, alpha2).next();
-		tessellator.draw();
-		RenderSystem.disableBlend();
+	public static void horizontalGradient(DrawContext ctx, int x1, int y1, int x2, int y2, int color1, int color2) {
+		// Fill with columns of interpolated colors, since DrawContext only exposes vertical gradients
+		int width = x2 - x1;
+
+		if (width <= 0) {
+			return;
+		}
+
+		for (int i = 0; i < width; i++) {
+			float progress = width == 1 ? 0 : i / (float) (width - 1);
+			ctx.fill(x1 + i, y1, x1 + i + 1, y2, lerpColor(color1, color2, progress));
+		}
 	}
 
-	public static void verticalGradient(MatrixStack matrices, int x1, int y1, int x2, int y2, int color1, int color2) {
-		float alpha1 = (color1 >> 24 & 255) / 255.0F;
-		float red1   = (color1 >> 16 & 255) / 255.0F;
-		float green1 = (color1 >> 8 & 255) / 255.0F;
-		float blue1  = (color1 & 255) / 255.0F;
-		float alpha2 = (color2 >> 24 & 255) / 255.0F;
-		float red2   = (color2 >> 16 & 255) / 255.0F;
-		float green2 = (color2 >> 8 & 255) / 255.0F;
-		float blue2  = (color2 & 255) / 255.0F;
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder bufferBuilder = tessellator.getBuffer();
-		bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-		bufferBuilder.vertex(x2, y1, 0).color(red1, green1, blue1, alpha1).next();
-		bufferBuilder.vertex(x1, y1, 0).color(red1, green1, blue1, alpha1).next();
-		bufferBuilder.vertex(x1, y2, 0).color(red2, green2, blue2, alpha2).next();
-		bufferBuilder.vertex(x2, y2, 0).color(red2, green2, blue2, alpha2).next();
-		tessellator.draw();
-		RenderSystem.disableBlend();
+	public static void verticalGradient(DrawContext ctx, int x1, int y1, int x2, int y2, int color1, int color2) {
+		ctx.fillGradient(x1, y1, x2, y2, color1, color2);
+	}
+
+	/**
+	 * Fallback in case the mouse release event was never delivered to this window.
+	 */
+	protected void checkMouseRelease() {
+		if (dragging && !isMouseButtonDown(GLFW.GLFW_MOUSE_BUTTON_LEFT)
+				&& !isMouseButtonDown(GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+				&& !isMouseButtonDown(GLFW.GLFW_MOUSE_BUTTON_MIDDLE)) {
+			dragging = false;
+		}
+	}
+
+	private static boolean isMouseButtonDown(int button) {
+		return GLFW.glfwGetMouseButton(MinecraftClient.getInstance().getWindow().getHandle(), button) == GLFW.GLFW_PRESS;
+	}
+
+	private static int lerpColor(int color1, int color2, float progress) {
+		int a1 = color1 >> 24 & 255, r1 = color1 >> 16 & 255, g1 = color1 >> 8 & 255, b1 = color1 & 255;
+		int a2 = color2 >> 24 & 255, r2 = color2 >> 16 & 255, g2 = color2 >> 8 & 255, b2 = color2 & 255;
+
+		int a = (int) (a1 + (a2 - a1) * progress);
+		int r = (int) (r1 + (r2 - r1) * progress);
+		int g = (int) (g1 + (g2 - g1) * progress);
+		int b = (int) (b1 + (b2 - b1) * progress);
+
+		return a << 24 | r << 16 | g << 8 | b;
 	}
 }

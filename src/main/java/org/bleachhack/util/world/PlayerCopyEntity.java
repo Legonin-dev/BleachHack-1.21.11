@@ -34,13 +34,13 @@ public class PlayerCopyEntity extends OtherClientPlayerEntity {
 		// Cache the player textures, then switch to a random uuid
 		// because the world doesn't allow duplicate uuids in 1.17+
 		getPlayerListEntry();
-		dataTracker.set(PLAYER_MODEL_PARTS, player.getDataTracker().get(PLAYER_MODEL_PARTS));
+		dataTracker.set(PLAYER_MODE_CUSTOMIZATION_ID, player.getDataTracker().get(PLAYER_MODE_CUSTOMIZATION_ID));
 		setUuid(UUID.randomUUID());
 	}
 
 	public void spawn() {
 		unsetRemoved();
-		MinecraftClient.getInstance().world.addEntity(this.getId(), this);
+		MinecraftClient.getInstance().world.addEntity(this);
 	}
 
 	public void despawn() {

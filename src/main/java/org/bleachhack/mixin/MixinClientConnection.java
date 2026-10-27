@@ -8,7 +8,6 @@
  */
 package org.bleachhack.mixin;
 
-import net.minecraft.network.PacketCallbacks;
 import org.bleachhack.BleachHack;
 import org.bleachhack.command.Command;
 import org.bleachhack.command.CommandManager;
@@ -20,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
@@ -45,8 +45,8 @@ public class MixinClientConnection {
 		}
 	}
 
-	@Inject(method = "send(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/PacketCallbacks;)V", at = @At("HEAD"), cancellable = true)
-	private void send(Packet<?> packet, PacketCallbacks packetCallback, CallbackInfo callback) {
+	@Inject(method = "send(Lnet/minecraft/network/packet/Packet;Lio/netty/channel/ChannelFutureListener;Z)V", at = @At("HEAD"), cancellable = true)
+	private void send(Packet<?> packet, ChannelFutureListener listener, boolean flush, CallbackInfo callback) {
 		if (packet instanceof ChatMessageC2SPacket) {
 			if (!CommandManager.allowNextMsg) {
 				ChatMessageC2SPacket pack = (ChatMessageC2SPacket) packet;

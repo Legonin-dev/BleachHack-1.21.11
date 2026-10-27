@@ -8,69 +8,62 @@
  */
 package org.bleachhack.module.mods;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+import java.util.Objects;
 
-import net.minecraft.client.gl.PostEffectProcessor;
-import org.bleachhack.event.events.EventRenderShader;
+import org.bleachhack.event.events.EventWorldRender;
 import org.bleachhack.eventbus.BleachSubscribe;
 import org.bleachhack.module.Module;
 import org.bleachhack.module.ModuleCategory;
 import org.bleachhack.setting.module.SettingMode;
 
-import com.google.gson.JsonSyntaxException;
-
 import net.minecraft.util.Identifier;
 
+/**
+ * Cycles through the vanilla post effects that are still shipped in 1.21.11.
+ * The old "super secret settings" shaders no longer exist in the game.
+ */
 public class ShaderRender extends Module {
 
 	private Identifier lastId = null;
-	private PostEffectProcessor lastShader = null;
-	private int lastWidth;
-	private int lastHeight;
 
-	private List<Identifier> shaders = new ArrayList<>();
+	private final List<Identifier> shaders = new ArrayList<>();
 
 	public ShaderRender() {
-		super("ShaderRender", KEY_UNBOUND, ModuleCategory.RENDER, "1.7 Super secret settings.",
-				new SettingMode("Shader", "Notch", "FXAA", "Art", "Bumpy", "Blobs", "Blobs2", "Pencil", "Vibrant",
-						"Deconverge", "Flip", "Invert", "NTSC", "Outline", "Phosphor", "Scanline", "Sobel",
-						"Bits", "Desaturate", "Green", "Blur", "Wobble", "Antialias", "Creeper", "Spider").withDesc("Shader to use."));
-		
-		for (String s: getSetting(0).asMode().modes) {
-			if (s.equals("Vibrant")) {
-				shaders.add(new Identifier("shaders/post/color_convolve.json"));
-			} else if (s.equals("Scanline")) {
-				shaders.add(new Identifier("shaders/post/scan_pincushion.json"));
+		super("ShaderRender", KEY_UNBOUND, ModuleCategory.RENDER, "Cycles through the vanilla post effects.",
+				new SettingMode("Shader", "Creeper", "Spider", "Blur", "Invert", "None").withDesc("Post effect to use."));
+
+		shaders.add(Identifier.of("minecraft", "creeper"));
+		shaders.add(Identifier.of("minecraft", "spider"));
+		shaders.add(Identifier.of("minecraft", "blur"));
+		shaders.add(Identifier.of("minecraft", "invert"));
+		shaders.add(null);
+	}
+
+	@BleachSubscribe
+	public void onWorldRender(EventWorldRender.Post event) {
+		Identifier id = shaders.get(getSetting(0).asMode().getMode());
+
+		if (!Objects.equals(id, lastId)) {
+			lastId = id;
+
+			if (id != null) {
+				mc.gameRenderer.setPostProcessor(id);
 			} else {
-				shaders.add(new Identifier("shaders/post/" + s.toLowerCase(Locale.ENGLISH) + ".json"));
+				mc.gameRenderer.clearPostProcessor();
 			}
 		}
 	}
 
-	@BleachSubscribe
-	public void onWorldRender(EventRenderShader event) {
-		if (lastShader == null || lastWidth != mc.getWindow().getFramebufferWidth() || lastHeight != mc.getWindow().getFramebufferHeight()
-				|| !shaders.get(getSetting(0).asMode().getMode()).equals(lastId)) {
-			lastId = shaders.get(getSetting(0).asMode().getMode());
-			lastWidth = mc.getWindow().getFramebufferWidth();
-			lastHeight = mc.getWindow().getFramebufferHeight();
-
-			try {
-				if (lastShader != null) {
-					lastShader.close();
-				}
-
-				lastShader = new PostEffectProcessor(mc.getTextureManager(), mc.getResourceManager(), mc.getFramebuffer(), lastId);
-				lastShader.setupDimensions(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight());
-			} catch (JsonSyntaxException | IOException e) {
-				e.printStackTrace();
-			}
+	@Override
+	public void onDisable(boolean inWorld) {
+		if (lastId != null) {
+			mc.gameRenderer.clearPostProcessor();
 		}
 
-		event.setEffect(lastShader);
+		lastId = null;
+		super.onDisable(inWorld);
 	}
 
 }

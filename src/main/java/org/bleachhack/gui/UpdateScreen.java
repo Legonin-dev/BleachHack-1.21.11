@@ -12,7 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
@@ -170,9 +170,7 @@ public class UpdateScreen extends WindowScreen {
 	}
 
 	@Override
-	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		this.renderBackground(matrices);
-
+	public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		int offset = scrollbar.getOffsetSinceRender();
 		int wh = getWindow(0).y2 - getWindow(0).y1;
 		for (WindowWidget widget: changelogWidgets) {
@@ -181,14 +179,14 @@ public class UpdateScreen extends WindowScreen {
 			widget.y2 -= offset;
 		}
 
-		super.render(matrices, mouseX, mouseY, delta);
+		super.render(ctx, mouseX, mouseY, delta);
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-		scrollbar.moveScrollbar((int) -amount * 7);
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+		scrollbar.moveScrollbar((int) -verticalAmount * 7);
 
-		return super.mouseScrolled(mouseX, mouseY, amount);
+		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
 	@Override

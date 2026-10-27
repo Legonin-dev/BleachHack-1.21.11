@@ -84,7 +84,7 @@ public class NoSlow extends Module {
 
 		/* Slime Block */
 		if (getSetting(2).asToggle().getState()
-				&& mc.world.getBlockState(BlockPos.ofFloored(mc.player.getPos().add(0, -0.01, 0))).getBlock() == Blocks.SLIME_BLOCK && mc.player.isOnGround()) {
+				&& mc.world.getBlockState(BlockPos.ofFloored(mc.player.getEntityPos().add(0, -0.01, 0))).getBlock() == Blocks.SLIME_BLOCK && mc.player.isOnGround()) {
 			double d = Math.abs(mc.player.getVelocity().y);
 			if (d < 0.1D && !mc.player.bypassesSteppingEffects()) {
 				double e = 1 / (0.4D + d * 0.2D);
@@ -114,12 +114,12 @@ public class NoSlow extends Module {
 
 			for (KeyBinding k : new KeyBinding[] { mc.options.forwardKey, mc.options.backKey,
 					mc.options.leftKey, mc.options.rightKey, mc.options.jumpKey, mc.options.sprintKey }) {
-				k.setPressed(InputUtil.isKeyPressed(mc.getWindow().getHandle(),
+				k.setPressed(InputUtil.isKeyPressed(mc.getWindow(),
 						InputUtil.fromTranslationKey(k.getBoundKeyTranslationKey()).getCode()));
 			}
 
 			if (getSetting(6).asToggle().asToggle().getChild(0).asToggle().getState()) {
-				mc.options.sneakKey.setPressed(InputUtil.isKeyPressed(mc.getWindow().getHandle(),
+				mc.options.sneakKey.setPressed(InputUtil.isKeyPressed(mc.getWindow(),
 						InputUtil.fromTranslationKey(mc.options.sneakKey.getBoundKeyTranslationKey()).getCode()));
 			}
 
@@ -143,13 +143,13 @@ public class NoSlow extends Module {
 			float amount = (System.currentTimeMillis() - lastTime) / 10f;
 			lastTime = System.currentTimeMillis();
 
-			if (InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_LEFT))
+			if (InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_LEFT))
 				yaw -= amount;
-			if (InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_RIGHT))
+			if (InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_RIGHT))
 				yaw += amount;
-			if (InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_UP))
+			if (InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_UP))
 				pitch -= amount;
-			if (InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_DOWN))
+			if (InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_DOWN))
 				pitch += amount;
 
 			if (getSetting(6).asToggle().asToggle().getChild(2).asToggle().asToggle().getChild(1).asToggle().getState()) {

@@ -128,7 +128,7 @@ public class AutoFarm extends Module {
 
 			if (harvestSetting.getState()) {
 				if ((harvestSetting.getChild(0).asToggle().getState() && block instanceof CropBlock && ((CropBlock) block).isMature(state))
-						|| (harvestSetting.getChild(1).asToggle().getState() && block instanceof GourdBlock)
+						|| (harvestSetting.getChild(1).asToggle().getState() && (block == net.minecraft.block.Blocks.PUMPKIN || block == net.minecraft.block.Blocks.MELON || block == net.minecraft.block.Blocks.CARVED_PUMPKIN || block == net.minecraft.block.Blocks.JACK_O_LANTERN))
 						|| (harvestSetting.getChild(2).asToggle().getState() && block instanceof NetherWartBlock && state.get(NetherWartBlock.AGE) >= 3)
 						|| (harvestSetting.getChild(3).asToggle().getState() && block instanceof CocoaBlock && state.get(CocoaBlock.AGE) >= 2)
 						|| (harvestSetting.getChild(4).asToggle().getState() && block instanceof SweetBerryBushBlock && state.get(SweetBerryBushBlock.AGE) >= 3)

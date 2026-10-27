@@ -41,7 +41,7 @@ public class ElytraFly extends Module {
 	@BleachSubscribe
 	public void onClientMove(EventClientMove event) {
 		/* Cancel the retarded auto elytra movement */
-		if (getSetting(0).asMode().getMode() == 2 && mc.player.isFallFlying()) {
+		if (getSetting(0).asMode().getMode() == 2 && mc.player.isGliding()) {
 			if (!mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed()) {
 				event.setVec(new Vec3d(event.getVec().x, 0, event.getVec().z));
 			}
@@ -64,7 +64,7 @@ public class ElytraFly extends Module {
 
 		switch (getSetting(0).asMode().getMode()) {
 			case 0:
-				if (mc.player.isFallFlying() && currentVel <= getSetting(2).asSlider().getValue()) {
+				if (mc.player.isGliding() && currentVel <= getSetting(2).asSlider().getValue()) {
 					if (mc.options.backKey.isPressed()) {
 						mc.player.addVelocity(MathHelper.sin(radianYaw) * boost, 0, MathHelper.cos(radianYaw) * -boost);
 					} else if (mc.player.getPitch() > 0) {
@@ -74,7 +74,7 @@ public class ElytraFly extends Module {
 
 				break;
 			case 1:
-				if (mc.player.isFallFlying() && currentVel <= getSetting(2).asSlider().getValue()) {
+				if (mc.player.isGliding() && currentVel <= getSetting(2).asSlider().getValue()) {
 					if (mc.options.forwardKey.isPressed()) {
 						mc.player.addVelocity(MathHelper.sin(radianYaw) * -boost, 0, MathHelper.cos(radianYaw) * boost);
 					} else if (mc.options.backKey.isPressed()) {
@@ -84,7 +84,7 @@ public class ElytraFly extends Module {
 
 				break;
 			case 2:
-				if (mc.player.isFallFlying()) {
+				if (mc.player.isGliding()) {
 					if (mc.options.backKey.isPressed()) vec3d = vec3d.negate();
 					if (mc.options.leftKey.isPressed()) vec3d = vec3d.rotateY((float) Math.toRadians(90));
 					else if (mc.options.rightKey.isPressed()) vec3d = vec3d.rotateY(-(float) Math.toRadians(90));
@@ -92,7 +92,7 @@ public class ElytraFly extends Module {
 					if (mc.options.sneakKey.isPressed()) vec3d = vec3d.add(0, -getSetting(3).asSlider().getValue(), 0);
 
 					mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-							mc.player.getX() + vec3d.x, mc.player.getY() - 0.01, mc.player.getZ() + vec3d.z, false));
+							mc.player.getX() + vec3d.x, mc.player.getY() - 0.01, mc.player.getZ() + vec3d.z, false, false));
 
 					mc.player.setVelocity(vec3d.x, vec3d.y, vec3d.z);
 				}
@@ -103,7 +103,7 @@ public class ElytraFly extends Module {
 					mc.player.setVelocity(vec3d);
 					mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, Mode.START_FALL_FLYING));
 					mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-							mc.player.getX() + vec3d.x, mc.player.getY() + vec3d.y, mc.player.getZ() + vec3d.z, true));
+							mc.player.getX() + vec3d.x, mc.player.getY() + vec3d.y, mc.player.getZ() + vec3d.z, true, false));
 				}
 
 				break;
@@ -116,14 +116,14 @@ public class ElytraFly extends Module {
 							mc.player.getX() + vec3d.x * randMult,
 							mc.player.getY(),
 							mc.player.getZ() + vec3d.z * randMult,
-							false));
+							false, false));
 
 					for (int i = 0; i < 6; i++) {
 						mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
 								mc.player.getX() + vec3d.x * (randMult + i),
 								mc.player.getY() - 0.0001,
 								mc.player.getZ() + vec3d.z * (randMult + i),
-								true));
+								true, false));
 					}
 				}
 		}
@@ -151,8 +151,6 @@ public class ElytraFly extends Module {
 		if (getSetting(0).asMode().getMode() == 4 && shouldPacketFly() && event.getPacket() instanceof PlayerPositionLookS2CPacket) {
 			PlayerPositionLookS2CPacket p = (PlayerPositionLookS2CPacket) event.getPacket();
 
-			p.yaw = mc.player.getYaw();
-			p.pitch = mc.player.getPitch();
 		}
 	}
 
@@ -167,7 +165,7 @@ public class ElytraFly extends Module {
 			if (event.getPacket() instanceof PlayerMoveC2SPacket.Full) {
 				event.setCancelled(true);
 				PlayerMoveC2SPacket p = (PlayerMoveC2SPacket) event.getPacket();
-				mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(p.getX(0), p.getY(0), p.getZ(0), p.isOnGround()));
+				mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(p.getX(0), p.getY(0), p.getZ(0), p.isOnGround(), false));
 			}
 		}
 	}
@@ -175,6 +173,6 @@ public class ElytraFly extends Module {
 	private boolean shouldPacketFly() {
 		return !mc.player.isOnGround()
 				&& !mc.options.sneakKey.isPressed()
-				&& mc.player.getInventory().getArmorStack(2).getItem() == Items.ELYTRA;
+				&& mc.player.getEquippedStack(net.minecraft.entity.EquipmentSlot.CHEST).getItem() == Items.ELYTRA;
 	}
 }

@@ -28,7 +28,7 @@ import com.google.gson.JsonElement;
 
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.particle.CampfireSmokeParticle;
-import net.minecraft.client.particle.ElderGuardianAppearanceParticle;
+import net.minecraft.client.particle.ElderGuardianParticle;
 import net.minecraft.client.particle.ExplosionLargeParticle;
 import net.minecraft.client.particle.FireworksSparkParticle.FireworkParticle;
 import net.minecraft.entity.ExperienceOrbEntity;
@@ -157,9 +157,13 @@ public class NoRender extends Module {
 				sign.setWorld(mc.world);
 
 				if (signSetting.getChild(0).asMode().getMode() == 2) {
+					net.minecraft.block.entity.SignText text = sign.getFrontText();
+
 					for (int i = 0; i < 4; i++) {
-						sign.setTextOnRow(i, signText[i]);
+						text = text.withMessage(i, signText[i]);
 					}
+
+					sign.setText(text, true);
 				}
 
 				event.setBlockEntity(sign);
@@ -169,7 +173,7 @@ public class NoRender extends Module {
 
 	@BleachSubscribe
 	public void onParticle(EventParticle.Normal event) {
-		if ((isWorldToggled(2) && event.getParticle() instanceof ElderGuardianAppearanceParticle)
+		if ((isWorldToggled(2) && event.getParticle() instanceof ElderGuardianParticle)
 				|| (isParticleToggled(0) && event.getParticle() instanceof CampfireSmokeParticle)
 				|| (isParticleToggled(1) && event.getParticle() instanceof ExplosionLargeParticle && Math.abs(event.getParticle().getBoundingBox().hashCode()) % 101 >= getParticleChild(1).getChild(0).asSlider().getValueInt())
 				|| (isParticleToggled(2) && event.getParticle() instanceof FireworkParticle)) {
@@ -203,7 +207,7 @@ public class NoRender extends Module {
 			if (opacity != 0) {
 				int opacity2 = (int) (opacity * 0.93);
 				Window.verticalGradient(
-						event.getMatrices(),
+						event.getContext(),
 						0, 0,
 						mc.currentScreen.width, mc.currentScreen.height,
 						(opacity2 << 24) | 0x101010,

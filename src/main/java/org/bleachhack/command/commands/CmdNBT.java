@@ -17,12 +17,16 @@ import org.bleachhack.util.BleachLogger;
 import org.bleachhack.util.io.BleachJsonHelper;
 
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.storage.NbtWriteView;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
+import net.minecraft.util.ErrorReporter;
 
 import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;
@@ -55,9 +59,9 @@ public class CmdNBT extends Command {
 				Text copy = Text.literal("\u00a7e\u00a7l<COPY>")
 						.styled(s ->
 						s.withClickEvent(
-								new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, textNbt.getString()))
+								new ClickEvent.CopyToClipboard(textNbt.getString()))
 						.withHoverEvent(
-								new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Copy the nbt of this item to your clipboard"))));
+								new HoverEvent.ShowText(Text.literal("Copy the nbt of this item to your clipboard"))));
 
 				BleachLogger.info(Text.literal("\u00a76\u00a7lNBT: ").append(copy).append("\u00a76\n" + textNbt));
 			}
@@ -83,15 +87,16 @@ public class CmdNBT extends Command {
 			}
 
 			ItemStack item = mc.player.getMainHandStack();
-			item.setNbt(StringNbtReader.parse(StringUtils.join(ArrayUtils.subarray(args, 1, args.length), ' ')));
-			BleachLogger.info("\u00a76Set NBT of " + item.getItem().getName().getString() + " to\n" + BleachJsonHelper.formatJson(item.getNbt().toString()));
+			NbtCompound nbt = StringNbtReader.readCompound(StringUtils.join(ArrayUtils.subarray(args, 1, args.length), ' '));
+			NbtComponent.set(DataComponentTypes.CUSTOM_DATA, item, nbt);
+			BleachLogger.info("\u00a76Set NBT of " + item.getItem().getName().getString() + " to\n" + BleachJsonHelper.formatJson(nbt.toString()));
 		} else if (args[0].equalsIgnoreCase("wipe")) {
 			if (!mc.interactionManager.getCurrentGameMode().isCreative()) {
 				BleachLogger.error("You must be in creative mode to wipe NBT!");
 				return;
 			}
 
-			mc.player.getMainHandStack().setNbt(new NbtCompound());
+			mc.player.getMainHandStack().remove(DataComponentTypes.CUSTOM_DATA);
 		} else {
 			throw new CmdSyntaxException();
 		}
@@ -99,7 +104,9 @@ public class CmdNBT extends Command {
 
 	private NbtCompound getNbt(String arg) {
 		if (arg.equalsIgnoreCase("hand")) {
-			return mc.player.getMainHandStack().getOrCreateNbt();
+			return mc.player.getMainHandStack()
+					.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT)
+					.copyNbt();
 		} else if (arg.equalsIgnoreCase("block")) {
 			HitResult target = mc.crosshairTarget;
 			if (target.getType() == HitResult.Type.BLOCK) {
@@ -107,7 +114,7 @@ public class CmdNBT extends Command {
 				BlockEntity be = mc.world.getBlockEntity(pos);
 
 				if (be != null) {
-					return be.createNbt();
+					return be.createNbt(mc.world.getRegistryManager());
 				} else {
 					return new NbtCompound();
 				}
@@ -118,7 +125,9 @@ public class CmdNBT extends Command {
 		} else if (arg.equalsIgnoreCase("entity")) {
 			HitResult target = mc.crosshairTarget;
 			if (target.getType() == HitResult.Type.ENTITY) {
-				return ((EntityHitResult) target).getEntity().writeNbt(new NbtCompound());
+				NbtWriteView view = NbtWriteView.create(ErrorReporter.EMPTY, mc.world.getRegistryManager());
+				((EntityHitResult) target).getEntity().writeData(view);
+				return view.getNbt();
 			}
 
 			BleachLogger.error("Not looking at an entity.");

@@ -54,27 +54,30 @@ public class NoVelocity extends Module {
 
 		if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket && getSetting(0).asToggle().getState()) {
 			EntityVelocityUpdateS2CPacket packet = (EntityVelocityUpdateS2CPacket) event.getPacket();
-			if (packet.getId() == mc.player.getId()) {
+			if (packet.getEntityId() == mc.player.getId()) {
 				double velXZ = getSetting(0).asToggle().getChild(0).asSlider().getValue() / 100;
 				double velY = getSetting(0).asToggle().getChild(1).asSlider().getValue() / 100;
-				
-				double pvelX = (packet.getVelocityX() / 8000d - mc.player.getVelocity().x) * velXZ;
-				double pvelY = (packet.getVelocityY() / 8000d - mc.player.getVelocity().y) * velY;
-				double pvelZ = (packet.getVelocityZ() / 8000d - mc.player.getVelocity().z) * velXZ;
 
-				packet.velocityX = (int) (pvelX * 8000 + mc.player.getVelocity().x * 8000);
-				packet.velocityY = (int) (pvelY * 8000 + mc.player.getVelocity().y * 8000);
-				packet.velocityZ = (int) (pvelZ * 8000 + mc.player.getVelocity().z * 8000);
+				net.minecraft.util.math.Vec3d velocity = packet.getVelocity();
+				double pvelX = (velocity.x / 8000d - mc.player.getVelocity().x) * velXZ;
+				double pvelY = (velocity.y / 8000d - mc.player.getVelocity().y) * velY;
+				double pvelZ = (velocity.z / 8000d - mc.player.getVelocity().z) * velXZ;
+
+				event.setPacket(new EntityVelocityUpdateS2CPacket(packet.getEntityId(), new net.minecraft.util.math.Vec3d(
+						pvelX + mc.player.getVelocity().x, pvelY + mc.player.getVelocity().y, pvelZ + mc.player.getVelocity().z)));
 			}
 		} else if (event.getPacket() instanceof ExplosionS2CPacket && getSetting(1).asToggle().getState()) {
 			ExplosionS2CPacket packet = (ExplosionS2CPacket) event.getPacket();
 
 			double velXZ = getSetting(1).asToggle().getChild(0).asSlider().getValue() / 100;
 			double velY = getSetting(1).asToggle().getChild(1).asSlider().getValue() / 100;
-			
-			packet.playerVelocityX = (float) (packet.getPlayerVelocityX() * velXZ);
-			packet.playerVelocityY = (float) (packet.getPlayerVelocityY() * velY);
-			packet.playerVelocityZ = (float) (packet.getPlayerVelocityZ() * velXZ);
+
+			if (packet.playerKnockback().isPresent()) {
+				net.minecraft.util.math.Vec3d knockback = packet.playerKnockback().get();
+				event.setPacket(new ExplosionS2CPacket(packet.center(), packet.radius(), packet.blockCount(),
+						java.util.Optional.of(new net.minecraft.util.math.Vec3d(knockback.x * velXZ, knockback.y * velY, knockback.z * velXZ)),
+						packet.explosionParticle(), packet.explosionSound(), packet.blockParticles()));
+			}
 		}
 	}
 

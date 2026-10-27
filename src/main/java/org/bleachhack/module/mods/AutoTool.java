@@ -12,15 +12,14 @@ import org.bleachhack.event.events.EventPacket;
 import org.bleachhack.event.events.EventTick;
 import org.bleachhack.eventbus.BleachSubscribe;
 import org.bleachhack.module.Module;
+import org.bleachhack.util.EnchantmentUtils;
 import org.bleachhack.module.ModuleCategory;
 import org.bleachhack.setting.module.SettingToggle;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
@@ -50,18 +49,18 @@ public class AutoTool extends Module {
 
 				queueSlot = -1;
 
-				lastSlot = mc.player.getInventory().selectedSlot;
+				lastSlot = mc.player.getInventory().getSelectedSlot();
 
 				int slot = getBestSlot(p.getPos());
 
-				if (slot != mc.player.getInventory().selectedSlot) {
+				if (slot != mc.player.getInventory().getSelectedSlot()) {
 					if (slot < 9) {
-						mc.player.getInventory().selectedSlot = slot;
+						mc.player.getInventory().setSelectedSlot(slot);
 						mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
 					} else if (mc.player.playerScreenHandler == mc.player.currentScreenHandler) {
-						boolean itemInHand = !mc.player.getInventory().getMainHandStack().isEmpty();
+						boolean itemInHand = !mc.player.getMainHandStack().isEmpty();
 						mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, 0, SlotActionType.PICKUP, mc.player);
-						mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
+						mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().getSelectedSlot(), 0, SlotActionType.PICKUP, mc.player);
 
 						if (itemInHand)
 							mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, 0, SlotActionType.PICKUP, mc.player);
@@ -71,9 +70,9 @@ public class AutoTool extends Module {
 				if (getSetting(1).asToggle().getState()) {
 					ItemStack handSlot = mc.player.getMainHandStack();
 					if (getSetting(0).asToggle().getState() && handSlot.isDamageable() && handSlot.getMaxDamage() - handSlot.getDamage() < 2
-							&& queueSlot == mc.player.getInventory().selectedSlot) {
-						queueSlot = mc.player.getInventory().selectedSlot == 0 ? 1 : mc.player.getInventory().selectedSlot - 1;
-					} else if (lastSlot >= 0 && lastSlot <= 8 && lastSlot != mc.player.getInventory().selectedSlot) {
+							&& queueSlot == mc.player.getInventory().getSelectedSlot()) {
+						queueSlot = mc.player.getInventory().getSelectedSlot() == 0 ? 1 : mc.player.getInventory().getSelectedSlot() - 1;
+					} else if (lastSlot >= 0 && lastSlot <= 8 && lastSlot != mc.player.getInventory().getSelectedSlot()) {
 						queueSlot = lastSlot;
 					}
 				}
@@ -84,7 +83,7 @@ public class AutoTool extends Module {
 	@BleachSubscribe
 	public void onTick(EventTick event) {
 		if (queueSlot != -1) {
-			mc.player.getInventory().selectedSlot = queueSlot;
+			mc.player.getInventory().setSelectedSlot(queueSlot);
 			mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(queueSlot));
 			queueSlot = -1;
 		}
@@ -93,7 +92,7 @@ public class AutoTool extends Module {
 	private int getBestSlot(BlockPos pos) {
 		BlockState state = mc.world.getBlockState(pos);
 
-		int bestSlot = mc.player.getInventory().selectedSlot;
+		int bestSlot = mc.player.getInventory().getSelectedSlot();
 
 		ItemStack handSlot = mc.player.getInventory().getStack(bestSlot);
 		if (getSetting(0).asToggle().getState() && handSlot.isDamageable() && handSlot.getMaxDamage() - handSlot.getDamage() < 2) {
@@ -101,12 +100,12 @@ public class AutoTool extends Module {
 		}
 
 		if (state.isAir())
-			return mc.player.getInventory().selectedSlot;
+			return mc.player.getInventory().getSelectedSlot();
 
 		float bestSpeed = getMiningSpeed(mc.player.getInventory().getStack(bestSlot), state);
 
 		for (int slot = 0; slot < 36; slot++) {
-			if (slot == mc.player.getInventory().selectedSlot || slot == bestSlot)
+			if (slot == mc.player.getInventory().getSelectedSlot() || slot == bestSlot)
 				continue;
 
 			ItemStack stack = mc.player.getInventory().getStack(slot);
@@ -119,7 +118,7 @@ public class AutoTool extends Module {
 					|| (getSetting(2).asToggle().getState()
 							&& speed == bestSpeed && !stack.isDamageable()
 							&& mc.player.getInventory().getStack(bestSlot).isDamageable()
-							&& EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, mc.player.getInventory().getStack(bestSlot)) == 0)) {
+							&& EnchantmentUtils.getLevel(Enchantments.SILK_TOUCH, mc.player.getInventory().getStack(bestSlot)) == 0)) {
 				bestSpeed = speed;
 				bestSlot = slot;
 			}
@@ -129,14 +128,14 @@ public class AutoTool extends Module {
 	}
 
 	private float getMiningSpeed(ItemStack stack, BlockState state) {
-		if ((state.getBlock() == Blocks.BAMBOO || state.getBlock() == Blocks.BAMBOO_SAPLING) && stack.getItem() instanceof SwordItem) {
+		if ((state.getBlock() == Blocks.BAMBOO || state.getBlock() == Blocks.BAMBOO_SAPLING) && stack.getItem().getTranslationKey().endsWith("_sword")) {
 			return Integer.MAX_VALUE;
 		}
 
 		float speed = stack.getMiningSpeedMultiplier(state);
 
 		if (speed > 1) {
-			int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, stack);
+			int efficiency = EnchantmentUtils.getLevel(Enchantments.EFFICIENCY, stack);
 			if (efficiency > 0 && !stack.isEmpty())
 				speed += efficiency * efficiency + 1;
 		}

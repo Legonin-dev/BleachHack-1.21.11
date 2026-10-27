@@ -14,10 +14,9 @@ import org.bleachhack.setting.SettingDataHandlers;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.sound.SoundEvents;
 
 public class SettingKey extends ModuleSetting<Integer> {
@@ -27,26 +26,26 @@ public class SettingKey extends ModuleSetting<Integer> {
 	}
 
 	@Override
-	public void render(ModuleWindow window, MatrixStack matrices, int x, int y, int len) {
+	public void render(ModuleWindow window, DrawContext ctx, int x, int y, int len) {
 		if (window.mouseOver(x, y, x + len, y + 12)) {
-			DrawableHelper.fill(matrices, x + 1, y, x + len, y + 12, 0x70303070);
+			ctx.fill(x + 1, y, x + len, y + 12, 0x70303070);
 		}
 		
 		if (window.keyDown >= 0 && window.keyDown != GLFW.GLFW_KEY_ESCAPE && window.mouseOver(x, y, x + len, y + 12)) {
 			setValue(window.keyDown == GLFW.GLFW_KEY_DELETE ? Module.KEY_UNBOUND : window.keyDown);
 			MinecraftClient.getInstance().getSoundManager().play(
-					PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
+					PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
 		}
 
 		int key = getValue();
-		String name = key < 0 ? "NONE" : InputUtil.fromKeyCode(key, -1).getLocalizedText().getString();
+		String name = key < 0 ? "NONE" : InputUtil.fromKeyCode(new net.minecraft.client.input.KeyInput(key, -1, 0)).getLocalizedText().getString();
 		if (name == null)
 			name = "KEY" + key;
 		else if (name.isEmpty())
 			name = "NONE";
 
-		MinecraftClient.getInstance().textRenderer.drawWithShadow(
-				matrices, "Bind: " + name + (window.mouseOver(x, y, x + len, y + 12) ? "..." : ""), x + 3, y + 2, 0xcfe0cf);
+		ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer,
+				"Bind: " + name + (window.mouseOver(x, y, x + len, y + 12) ? "..." : ""), x + 3, y + 2,0xFFcfe0cf);
 	}
 
 	public SettingKey withDesc(String desc) {

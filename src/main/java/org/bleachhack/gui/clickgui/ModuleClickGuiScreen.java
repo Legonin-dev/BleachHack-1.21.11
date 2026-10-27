@@ -26,7 +26,7 @@ import org.bleachhack.util.io.BleachFileHelper;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 
 
@@ -66,7 +66,7 @@ public class ModuleClickGuiScreen extends ClickGuiScreen {
 		}
 	}
 
-	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+	public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		BleachFileHelper.SCHEDULE_SAVE_CLICKGUI.set(true);
 		ClickGui clickGui = ModuleManager.getModule(ClickGui.class);
 
@@ -98,14 +98,14 @@ public class ModuleClickGuiScreen extends ClickGuiScreen {
 			}
 		}
 
-		super.render(matrices, mouseX, mouseY, delta);
+		super.render(ctx, mouseX, mouseY, delta);
 
-		textRenderer.draw(matrices, "BleachHack-" + BleachHack.VERSION + "-" + SharedConstants.getGameVersion().getName(), 3, 3, 0x305090);
-		textRenderer.draw(matrices, "BleachHack-" + BleachHack.VERSION + "-" + SharedConstants.getGameVersion().getName(), 2, 2, 0x6090d0);
+		ctx.drawText(textRenderer, "BleachHack-" + BleachHack.VERSION + "-" + SharedConstants.getGameVersion().name(), 3, 3, 0xFF305090, false);
+		ctx.drawText(textRenderer, "BleachHack-" + BleachHack.VERSION + "-" + SharedConstants.getGameVersion().name(), 2, 2, 0xFF6090d0, false);
 
 		if (clickGui.getSetting(2).asToggle().getState()) {
-			textRenderer.drawWithShadow(matrices, "Current prefix is: \"" + Command.getPrefix() + "\" (" + Command.getPrefix() + "help)", 2, height - 20, 0x99ff99);
-			textRenderer.drawWithShadow(matrices, "Use " + Command.getPrefix() + "clickgui to reset the clickgui", 2, height - 10, 0x9999ff);
+			ctx.drawTextWithShadow(textRenderer, "Current prefix is: \"" + Command.getPrefix() + "\" (" + Command.getPrefix() + "help)", 2, height - 20, 0xFF99ff99);
+			ctx.drawTextWithShadow(textRenderer, "Use " + Command.getPrefix() + "clickgui to reset the clickgui", 2, height - 10, 0xFF9999ff);
 		}
 	}
 }

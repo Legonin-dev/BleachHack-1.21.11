@@ -20,9 +20,8 @@ import org.bleachhack.gui.clickgui.window.ModuleWindow;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.sound.SoundEvents;
 
 public class SettingToggle extends ModuleSetting<Boolean> {
@@ -38,51 +37,49 @@ public class SettingToggle extends ModuleSetting<Boolean> {
 		return getValue().booleanValue();
 	}
 
-	public void render(ModuleWindow window, MatrixStack matrices, int x, int y, int len) {
+	public void render(ModuleWindow window, DrawContext ctx, int x, int y, int len) {
 		String color2 = getValue() ? "\u00a7a" : "\u00a7c";
 
 		if (window.mouseOver(x, y, x + len, y + 12)) {
-			DrawableHelper.fill(matrices, x + 1, y, x + len, y + 12, 0x70303070);
+			ctx.fill(x + 1, y, x + len, y + 12, 0x70303070);
 		}
 
 		if (!children.isEmpty()) {
 			if (window.rmDown && window.mouseOver(x, y, x + len, y + 12)) {
 				expanded = !expanded;
-				MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
+				MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
 			}
 
 			if (expanded) {
-				DrawableHelper.fill(matrices, x + 2, y + 12, x + 3, y + getHeight(len) - 1, 0xff8070b0);
+				ctx.fill(x + 2, y + 12, x + 3, y + getHeight(len) - 1, 0xff8070b0);
 
 				int h = y + 12;
 				for (ModuleSetting<?> s : children) {
-					s.render(window, matrices, x + 2, h, len - 2);
+					s.render(window, ctx, x + 2, h, len - 2);
 
 					h += s.getHeight(len - 3);
 				}
 			}
 
 			if (expanded) {
-				MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices,
-						color2 + "\u2228",
+				ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, color2 + "\u2228",
 						x + len - 8, y + 3, -1);
 			} else {
-				matrices.push();
+				ctx.getMatrices().pushMatrix();
 
-				matrices.scale(0.75f, 0.75f, 1f);
-				MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices,
-						color2 + "\u00a7l>",
+				ctx.getMatrices().scale(0.75f, 0.75f);
+				ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, color2 + "\u00a7l>",
 						(int) ((x + len - 7) * 1 / 0.75), (int) ((y + 4) * 1 / 0.75), -1);
 
-				matrices.pop();
+				ctx.getMatrices().popMatrix();
 			}
 		}
 
-		MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, color2 + getName(), x + 3, y + 2, 0xffffff);
+		ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, color2 + getName(), x + 3, y + 2, 0xFFffffff);
 
 		if (window.mouseOver(x, y, x + len, y + 12) && window.lmDown) {
 			setValue(!getValue());
-			MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
+			MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.3F));
 		}
 	}
 

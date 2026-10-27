@@ -10,27 +10,9 @@ package org.bleachhack.event.events;
 
 import org.bleachhack.event.Event;
 
-import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.util.math.Vec3d;
 
 public class EventSkyRender extends Event {
-
-	public static class Properties extends EventSkyRender {
-
-		private DimensionEffects sky;
-
-		public Properties(DimensionEffects sky) {
-			this.setSky(sky);
-		}
-
-		public DimensionEffects getSky() {
-			return sky;
-		}
-
-		public void setSky(DimensionEffects sky) {
-			this.sky = sky;
-		}
-	}
 
 	public static class Color extends EventSkyRender {
 

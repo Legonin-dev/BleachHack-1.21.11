@@ -19,7 +19,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
@@ -70,15 +70,14 @@ public class EntityMenuEditScreen extends WindowScreen {
 	}
 
 	@Override
-	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		renderBackground(matrices);
-		super.render(matrices, mouseX, mouseY, delta);
+	public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
+		super.render(ctx, mouseX, mouseY, delta);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void onRenderWindow(MatrixStack matrices, int window, int mouseX, int mouseY) {
-		super.onRenderWindow(matrices, window, mouseX, mouseY);
+	public void onRenderWindow(DrawContext ctx, int window, int mouseX, int mouseY) {
+		super.onRenderWindow(ctx, window, mouseX, mouseY);
 
 		if (window == 0) {
 			int x = getWindow(0).x1;
@@ -94,14 +93,14 @@ public class EntityMenuEditScreen extends WindowScreen {
 			insertStartString = null;
 
 			int seperator = (int) (x + w / 3.25);
-			fill(matrices, seperator, y, seperator + 1, y + h, 0xff606090);
+			ctx.fill( seperator, y, seperator + 1, y + h, 0xff606090);
 
-			textRenderer.drawWithShadow(matrices, "Interactions:", x + 6, y + 5, 0xffffff);
+			ctx.drawTextWithShadow(textRenderer, "Interactions:", x + 6, y + 5, 0xFFffffff);
 
 			boolean mouseOverAdd = mouseX >= seperator - 16 && mouseX <= seperator - 3 && mouseY >= y + 3 && mouseY <= y + 15;
-			Window.fill(matrices, seperator - 16, y + 3, seperator - 3, y + 15,
+			Window.fill(ctx, seperator - 16, y + 3, seperator - 3, y + 15,
 					mouseOverAdd ? 0x4fb070f0 : 0x60606090);
-			textRenderer.drawWithShadow(matrices, "\u00a7a+", seperator - 12, y + 5, 0xffffff);
+			ctx.drawTextWithShadow(textRenderer, "\u00a7a+", seperator - 12, y + 5, 0xFFffffff);
 
 			if (mouseOverAdd) {
 				addEntry = true;
@@ -115,10 +114,9 @@ public class EntityMenuEditScreen extends WindowScreen {
 			if (scroll > 0) {
 				boolean mouseOver = mouseX >= x + 2 && mouseX <= seperator - 1 && mouseY >= y + 17 && mouseY <= y + 33;
 
-				Window.fill(matrices, x + 3, y + 17, seperator - 2, y + 33,
+				Window.fill(ctx, x + 3, y + 17, seperator - 2, y + 33,
 						mouseOver ? 0x4fb070f0 : 0x50606090);
-				drawCenteredTextWithShadow(matrices, textRenderer,
-						"\u00a7a\u00a7l^", x + (seperator - x) / 2, y + 21, 0xffffff);
+				ctx.drawCenteredTextWithShadow(textRenderer, "\u00a7a\u00a7l^", x + (seperator - x) / 2, y + 21, 0xFFffffff);
 
 				entries++;
 				if (mouseOver) {
@@ -129,10 +127,9 @@ public class EntityMenuEditScreen extends WindowScreen {
 			if (interactions.size() - maxEntries > 0 && scroll < interactions.size() - maxEntries) {
 				boolean mouseOver = mouseX >= x + 2 && mouseX <= seperator - 1 && mouseY >= y + 17 + (maxEntries * 17) && mouseY <= y + 33 + (maxEntries * 17);
 
-				Window.fill(matrices, x + 3, y + 17 + (maxEntries * 17), seperator - 2, y + 33 + (maxEntries * 17),
+				Window.fill(ctx, x + 3, y + 17 + (maxEntries * 17), seperator - 2, y + 33 + (maxEntries * 17),
 						mouseOver ? 0x4fb070f0 : 0x50606090);
-				drawCenteredTextWithShadow(matrices, textRenderer,
-						"\u00a7a\u00a7lv", x + (seperator - x) / 2, y + 21 + (maxEntries * 17), 0xffffff);
+				ctx.drawCenteredTextWithShadow(textRenderer, "\u00a7a\u00a7lv", x + (seperator - x) / 2, y + 21 + (maxEntries * 17), 0xFFffffff);
 
 				maxEntries--;
 				if (mouseOver) {
@@ -150,10 +147,9 @@ public class EntityMenuEditScreen extends WindowScreen {
 				int curY = y + 17 + entries * 17;
 				boolean mouseOver = mouseX >= x + 2 && mouseX <= seperator - 1 && mouseY >= curY && mouseY <= curY + 16;
 
-				Window.fill(matrices, x + 3, curY, seperator - 2, curY + 16,
+				Window.fill(ctx, x + 3, curY, seperator - 2, curY + 16,
 						entry.equals(selectedEntry) ? 0x4f90f090 : mouseOver ? 0x4fb070f0 : 0x50606090);
-				drawCenteredTextWithShadow(matrices, textRenderer,
-						textRenderer.trimToWidth(entry, seperator - x - 6), x + (seperator - x) / 2, curY + 4, 0xffffff);
+				ctx.drawCenteredTextWithShadow(textRenderer, textRenderer.trimToWidth(entry, seperator - x - 6), x + (seperator - x) / 2, curY + 4, 0xFFffffff);
 
 				if (mouseOver) {
 					hoverEntry = entry;
@@ -166,19 +162,19 @@ public class EntityMenuEditScreen extends WindowScreen {
 			}
 
 			if (selectedEntry != null) {
-				textRenderer.drawWithShadow(matrices, "Name:", seperator + 8, y + 5, 0xffffff);
+				ctx.drawTextWithShadow(textRenderer, "Name:", seperator + 8, y + 5, 0xFFffffff);
 
 				editNameField.setX(seperator + 8);
 				editNameField.setY(y + 18);
 				editNameField.setWidth(w - (seperator - x) - 16);
-				editNameField.render(matrices, mouseX, mouseY, client.getTickDelta());
+				editNameField.render(ctx, mouseX, mouseY, client.getRenderTickCounter().getTickProgress(false));
 
-				textRenderer.drawWithShadow(matrices, "Value:", seperator + 8, y + 45, 0xffffff);
+				ctx.drawTextWithShadow(textRenderer, "Value:", seperator + 8, y + 45, 0xFFffffff);
 
 				editValueField.setX(seperator + 8);
 				editValueField.setY(y + 57);
 				editValueField.setWidth(w - (seperator - x) - 16);
-				editValueField.render(matrices, mouseX, mouseY, client.getTickDelta());
+				editValueField.render(ctx, mouseX, mouseY, client.getRenderTickCounter().getTickProgress(false));
 
 				if (!selectedEntry.equals(editNameField.getText()) && !interactions.containsKey(editNameField.getText())) {
 					MutablePair<String, String> pair = interactions.getPair(selectedEntry);
@@ -190,7 +186,7 @@ public class EntityMenuEditScreen extends WindowScreen {
 					interactions.getPair(selectedEntry).setRight(editValueField.getText());
 				}
 
-				textRenderer.drawWithShadow(matrices, "Insert:", seperator + 8, y + 85, 0xffffff);
+				ctx.drawTextWithShadow(textRenderer, "Insert:", seperator + 8, y + 85, 0xFFffffff);
 
 				int line = 0;
 				int curX = 0;
@@ -203,8 +199,8 @@ public class EntityMenuEditScreen extends WindowScreen {
 					}
 
 					boolean mouseOverInsert = mouseX >= seperator + 7 + curX && mouseX <= seperator + 10 + curX + textLen && mouseY >= y + 97 + line * 14 && mouseY <= y + 108 + line * 14;
-					fill(matrices, seperator + 7 + curX, y + 97 + line * 14, seperator + 10 + curX + textLen, y + 108 + line * 14, mouseOverInsert ? 0x9f6060b0 : 0x9f8070b0);
-					textRenderer.drawWithShadow(matrices, insert, seperator + 9 + curX, y + 99 + line * 14, 0xffffff);
+					ctx.fill( seperator + 7 + curX, y + 97 + line * 14, seperator + 10 + curX + textLen, y + 108 + line * 14, mouseOverInsert ? 0x9f6060b0 : 0x9f8070b0);
+					ctx.drawTextWithShadow(textRenderer, insert, seperator + 9 + curX, y + 99 + line * 14, 0xFFffffff);
 					
 					if (mouseOverInsert) {
 						insertString = insert;
@@ -213,7 +209,7 @@ public class EntityMenuEditScreen extends WindowScreen {
 					curX += textLen + 7;
 				}
 				
-				textRenderer.drawWithShadow(matrices, "Mode:", seperator + 8, y + 120 + line * 14, 0xffffff);
+				ctx.drawTextWithShadow(textRenderer, "Mode:", seperator + 8, y + 120 + line * 14, 0xFFffffff);
 
 				int startY = y + 132 + line * 14;
 				line = 0;
@@ -227,8 +223,8 @@ public class EntityMenuEditScreen extends WindowScreen {
 					}
 
 					boolean mouseOverInsert = mouseX >= seperator + 7 + curX && mouseX <= seperator + 10 + curX + textLen && mouseY >= startY + line * 14 && mouseY <= startY + 11 + line * 14;
-					fill(matrices, seperator + 7 + curX, startY + line * 14, seperator + 10 + curX + textLen, startY + 11 + line * 14, mouseOverInsert ? 0x9f6060b0 : 0x9f8070b0);
-					textRenderer.drawWithShadow(matrices, pair.getLeft(), seperator + 9 + curX, startY + 2 + line * 14, 0xffffff);
+					ctx.fill( seperator + 7 + curX, startY + line * 14, seperator + 10 + curX + textLen, startY + 11 + line * 14, mouseOverInsert ? 0x9f6060b0 : 0x9f8070b0);
+					ctx.drawTextWithShadow(textRenderer, pair.getLeft(), seperator + 9 + curX, startY + 2 + line * 14, 0xFFffffff);
 					
 					if (mouseOverInsert) {
 						insertStartString = pair.getRight();
@@ -238,8 +234,8 @@ public class EntityMenuEditScreen extends WindowScreen {
 				}
 
 				boolean mouseOverDelete = mouseX >= x + w - 70 && mouseX <= x + w - 5 && mouseY >= y + h - 22 && mouseY <= y + h - 4;
-				Window.fill(matrices, x + w - 70, y + h - 22, x + w - 5, y + h - 4, 0x60e05050, 0x60c07070, mouseOverDelete ? 0x20e05050 : 0x10e07070);
-				drawCenteredTextWithShadow(matrices, textRenderer, "Delete", x + w - 37, y + h - 17, 0xf0f0f0);
+				Window.fill(ctx, x + w - 70, y + h - 22, x + w - 5, y + h - 4, 0x60e05050, 0x60c07070, mouseOverDelete ? 0x20e05050 : 0x10e07070);
+				ctx.drawCenteredTextWithShadow(textRenderer, "Delete", x + w - 37, y + h - 17, 0xFFf0f0f0);
 
 				if (mouseOverDelete) {
 					deleteEntry = selectedEntry;
@@ -261,9 +257,13 @@ public class EntityMenuEditScreen extends WindowScreen {
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		editNameField.mouseClicked(mouseX, mouseY, button);
-		editValueField.mouseClicked(mouseX, mouseY, button);
+	public boolean mouseClicked(net.minecraft.client.gui.Click click, boolean doubled) {
+		double mouseX = click.x();
+		double mouseY = click.y();
+		int button = click.button();
+
+		editNameField.mouseClicked(click, doubled);
+		editValueField.mouseClicked(click, doubled);
 
 		if (hoverEntry != null && interactions.containsKey(hoverEntry)) {
 			selectedEntry = hoverEntry;
@@ -308,29 +308,23 @@ public class EntityMenuEditScreen extends WindowScreen {
 			insertString = null;
 		}
 
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(click, doubled);
 	}
 
 	@Override
-	public void tick() {
-		editNameField.tick();
-		editValueField.tick();
+	public boolean charTyped(net.minecraft.client.input.CharInput input) {
+		if (editNameField.isFocused()) editNameField.charTyped(input);
+		if (editValueField.isFocused()) editValueField.charTyped(input);
+
+		return super.charTyped(input);
 	}
 
 	@Override
-	public boolean charTyped(char chr, int modifiers) {
-		if (editNameField.isFocused()) editNameField.charTyped(chr, modifiers);
-		if (editValueField.isFocused()) editValueField.charTyped(chr, modifiers);
+	public boolean keyPressed(net.minecraft.client.input.KeyInput input) {
+		if (editNameField.isFocused()) editNameField.keyPressed(input);
+		if (editValueField.isFocused()) editValueField.keyPressed(input);
 
-		return super.charTyped(chr, modifiers);
-	}
-
-	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (editNameField.isFocused()) editNameField.keyPressed(keyCode, scanCode, modifiers);
-		if (editValueField.isFocused()) editValueField.keyPressed(keyCode, scanCode, modifiers);
-
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(input);
 	}
 
 	@Override

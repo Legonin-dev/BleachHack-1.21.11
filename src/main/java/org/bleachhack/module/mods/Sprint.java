@@ -27,8 +27,8 @@ public class Sprint extends Module {
 			return;
 
 		mc.player.setSprinting(
-				mc.player.input.movementForward > 0 && 
-				(mc.player.input.movementSideways != 0 ||mc.player.input.movementForward > 0) &&
+				mc.player.input.playerInput.forward() &&
+				(mc.player.input.playerInput.left() || mc.player.input.playerInput.right() || mc.player.input.playerInput.forward()) &&
 				!mc.player.isSneaking());
 	}
 }

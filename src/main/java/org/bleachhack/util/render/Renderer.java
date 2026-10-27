@@ -8,19 +8,26 @@
  */
 package org.bleachhack.util.render;
 
-import net.minecraft.util.math.RotationAxis;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+
 import org.bleachhack.util.Boxes;
 import org.bleachhack.util.render.color.LineColor;
 import org.bleachhack.util.render.color.QuadColor;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BuiltBuffer;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
+import net.minecraft.client.render.RenderSetup;
 import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
@@ -29,8 +36,37 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.RotationAxis;
 
 public class Renderer {
+
+	private static final RenderLayer LINES_NO_DEPTH = createLinesNoDepth();
+
+	// RenderLayer.of is package private in 1.21.11, so the layer is created through
+	// a lookup in the (unnamed) game module. Falls back to the depth tested lines
+	// if that is not possible.
+	private static RenderLayer createLinesNoDepth() {
+		try {
+			RenderPipeline pipeline = RenderPipeline.builder()
+					.withLocation("pipeline/bleachhack_lines_no_depth")
+					.withVertexShader("core/rendertype_lines")
+					.withFragmentShader("core/rendertype_lines")
+					.withBlend(BlendFunction.TRANSLUCENT)
+					.withCull(false)
+					.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+					.withDepthWrite(false)
+					.withVertexFormat(VertexFormats.POSITION_COLOR_NORMAL_LINE_WIDTH, VertexFormat.DrawMode.LINES)
+					.build();
+
+			RenderSetup setup = RenderSetup.builder(pipeline).translucent().build();
+
+			return (RenderLayer) MethodHandles.privateLookupIn(RenderLayer.class, MethodHandles.lookup())
+					.findStatic(RenderLayer.class, "of", MethodType.methodType(RenderLayer.class, String.class, RenderSetup.class))
+					.invoke("bleachhack_lines_no_depth", setup);
+		} catch (Throwable e) {
+			return RenderLayers.lines();
+		}
+	}
 
 	// -------------------- Fill + Outline Boxes --------------------
 
@@ -65,21 +101,11 @@ public class Renderer {
 			return;
 		}
 
-		setup();
-
 		MatrixStack matrices = matrixFrom(box.minX, box.minY, box.minZ);
 
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder buffer = tessellator.getBuffer();
-
-		// Fill
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-
-		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+		BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 		Vertexer.vertexBoxQuads(matrices, buffer, Boxes.moveToZero(box), color, excludeDirs);
-		tessellator.draw();
-
-		cleanup();
+		drawFilled(buffer);
 	}
 
 	// -------------------- Outline Boxes --------------------
@@ -93,25 +119,11 @@ public class Renderer {
 			return;
 		}
 
-		setup();
-
 		MatrixStack matrices = matrixFrom(box.minX, box.minY, box.minZ);
 
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder buffer = tessellator.getBuffer();
-
-		// Outline
-		RenderSystem.disableCull();
-		RenderSystem.setShader(GameRenderer::getRenderTypeLinesProgram);
-		RenderSystem.lineWidth(lineWidth);
-
-		buffer.begin(VertexFormat.DrawMode.LINES, VertexFormats.LINES);
-		Vertexer.vertexBoxLines(matrices, buffer, Boxes.moveToZero(box), color, excludeDirs);
-		tessellator.draw();
-
-		RenderSystem.enableCull();
-
-		cleanup();
+		BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.LINES, VertexFormats.POSITION_COLOR_NORMAL_LINE_WIDTH);
+		Vertexer.vertexBoxLines(matrices, buffer, Boxes.moveToZero(box), color, lineWidth, excludeDirs);
+		drawLines(buffer);
 	}
 
 	// -------------------- Quads --------------------
@@ -122,26 +134,16 @@ public class Renderer {
 			return;
 		}
 
-		setup();
-
 		MatrixStack matrices = matrixFrom(x1, y1, z1);
 
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder buffer = tessellator.getBuffer();
-
-		// Fill
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-
-		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+		BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 		Vertexer.vertexQuad(matrices, buffer,
 				0f, 0f, 0f,
 				(float) (x2 - x1), (float) (y2 - y1), (float) (z2 - z1),
 				(float) (x3 - x1), (float) (y3 - y1), (float) (z3 - z1),
 				(float) (x4 - x1), (float) (y4 - y1), (float) (z4 - z1),
 				cullMode, color);
-		tessellator.draw();
-
-		cleanup();
+		drawFilled(buffer);
 	}
 
 	public static void drawQuadOutline(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, float lineWidth, QuadColor color) {
@@ -150,61 +152,56 @@ public class Renderer {
 			return;
 		}
 
-		setup();
-
 		MatrixStack matrices = matrixFrom(x1, y1, z1);
 
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder buffer = tessellator.getBuffer();
+		BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.LINES, VertexFormats.POSITION_COLOR_NORMAL_LINE_WIDTH);
 
 		int[] colors = color.getAllColors();
 
-		// Outline
-		RenderSystem.disableCull();
-		RenderSystem.setShader(GameRenderer::getRenderTypeLinesProgram);
-		RenderSystem.lineWidth(lineWidth);
-
-		buffer.begin(VertexFormat.DrawMode.LINES, VertexFormats.LINES);
-		Vertexer.vertexLine(matrices, buffer, 0f, 0f, 0f, (float) (x2 - x1), (float) (y2 - y1), (float) (z2 - z1), LineColor.gradient(colors[0], colors[1]));
-		Vertexer.vertexLine(matrices, buffer, (float) (x2 - x1), (float) (y2 - y1), (float) (z2 - z1), (float) (x3 - x1), (float) (y3 - y1), (float) (z3 - z1), LineColor.gradient(colors[1], colors[2]));
-		Vertexer.vertexLine(matrices, buffer, (float) (x3 - x1), (float) (y3 - y1), (float) (z3 - z1), (float) (x4 - x1), (float) (y4 - y1), (float) (z4 - z1), LineColor.gradient(colors[2], colors[3]));
-		Vertexer.vertexLine(matrices, buffer, (float) (x4 - x1), (float) (y4 - y1), (float) (z4 - z1), 0f, 0f, 0f, LineColor.gradient(colors[3], colors[0]));
-		tessellator.draw();
-
-		RenderSystem.enableCull();
-		cleanup();
+		Vertexer.vertexLine(matrices, buffer, 0f, 0f, 0f, (float) (x2 - x1), (float) (y2 - y1), (float) (z2 - z1), LineColor.gradient(colors[0], colors[1]), lineWidth);
+		Vertexer.vertexLine(matrices, buffer, (float) (x2 - x1), (float) (y2 - y1), (float) (z2 - z1), (float) (x3 - x1), (float) (y3 - y1), (float) (z3 - z1), LineColor.gradient(colors[1], colors[2]), lineWidth);
+		Vertexer.vertexLine(matrices, buffer, (float) (x3 - x1), (float) (y3 - y1), (float) (z3 - z1), (float) (x4 - x1), (float) (y4 - y1), (float) (z4 - z1), LineColor.gradient(colors[2], colors[3]), lineWidth);
+		Vertexer.vertexLine(matrices, buffer, (float) (x4 - x1), (float) (y4 - y1), (float) (z4 - z1), 0f, 0f, 0f, LineColor.gradient(colors[3], colors[0]), lineWidth);
+		drawLines(buffer);
 	}
 
 	// -------------------- Lines --------------------
 
 	public static void drawLine(double x1, double y1, double z1, double x2, double y2, double z2, LineColor color, float width) {
+		drawLine(x1, y1, z1, x2, y2, z2, color, width, false);
+	}
+
+	public static void drawLine(double x1, double y1, double z1, double x2, double y2, double z2, LineColor color, float width, boolean depthTest) {
 		if (!FrustumUtils.isPointVisible(x1, y1, z1) && !FrustumUtils.isPointVisible(x2, y2, z2)) {
 			return;
 		}
 
-		setup();
-
 		MatrixStack matrices = matrixFrom(x1, y1, z1);
 
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder buffer = tessellator.getBuffer();
-
-		// Line
-		RenderSystem.disableDepthTest();
-		RenderSystem.disableCull();
-		RenderSystem.setShader(GameRenderer::getRenderTypeLinesProgram);
-		RenderSystem.lineWidth(width);
-
-		buffer.begin(VertexFormat.DrawMode.LINES, VertexFormats.LINES);
-		Vertexer.vertexLine(matrices, buffer, 0f, 0f, 0f, (float) (x2 - x1), (float) (y2 - y1), (float) (z2 - z1), color);
-		tessellator.draw();
-
-		RenderSystem.enableCull();
-		RenderSystem.enableDepthTest();
-		cleanup();
+		BufferBuilder buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.LINES, VertexFormats.POSITION_COLOR_NORMAL_LINE_WIDTH);
+		Vertexer.vertexLine(matrices, buffer, 0f, 0f, 0f, (float) (x2 - x1), (float) (y2 - y1), (float) (z2 - z1), color, width);
+		drawLines(buffer, depthTest);
 	}
 
 	// -------------------- Utils --------------------
+
+	public static void drawFilled(BufferBuilder buffer) {
+		BuiltBuffer built = buffer.endNullable();
+		if (built != null) {
+			RenderLayers.debugFilledBox().draw(built);
+		}
+	}
+
+	public static void drawLines(BufferBuilder buffer) {
+		drawLines(buffer, true);
+	}
+
+	public static void drawLines(BufferBuilder buffer, boolean depthTest) {
+		BuiltBuffer built = buffer.endNullable();
+		if (built != null) {
+			(depthTest ? RenderLayers.lines() : LINES_NO_DEPTH).draw(built);
+		}
+	}
 
 	public static MatrixStack matrixFrom(double x, double y, double z) {
 		MatrixStack matrices = new MatrixStack();
@@ -213,7 +210,7 @@ public class Renderer {
 		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
 
-		matrices.translate(x - camera.getPos().x, y - camera.getPos().y, z - camera.getPos().z);
+		matrices.translate(x - camera.getCameraPos().x, y - camera.getCameraPos().y, z - camera.getCameraPos().z);
 
 		return matrices;
 	}
@@ -223,7 +220,7 @@ public class Renderer {
 			return Vec3d.ZERO;
 		}
 
-		double tickDelta = MinecraftClient.getInstance().getTickDelta();
+		double tickDelta = MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false);
 		return new Vec3d(
 				e.getX() - MathHelper.lerp(tickDelta, e.lastRenderX, e.getX()),
 				e.getY() - MathHelper.lerp(tickDelta, e.lastRenderY, e.getY()),
@@ -231,11 +228,9 @@ public class Renderer {
 	}
 
 	public static void setup() {
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
+		// Pipeline state is now defined by the render layer used for drawing.
 	}
 
 	public static void cleanup() {
-		RenderSystem.disableBlend();
 	}
 }

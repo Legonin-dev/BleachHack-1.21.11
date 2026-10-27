@@ -53,7 +53,7 @@ public class BowBot extends Module {
 
 		if (getSetting(0).asToggle().getState()) {
 			if (mc.player.getMainHandStack().getItem() == Items.CROSSBOW
-					&& (float) mc.player.getItemUseTime() / (float) CrossbowItem.getPullTime(mc.player.getMainHandStack()) >= 1f) {
+					&& (float) mc.player.getItemUseTime() / (float) CrossbowItem.getPullTime(mc.player.getMainHandStack(), mc.player) >= 1f) {
 				mc.player.stopUsingItem();
 				mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, Direction.UP));
 				mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
@@ -85,7 +85,7 @@ public class BowBot extends Module {
 			velocity = Math.min(1f, (velocity * velocity + velocity * 2) / 3);
 
 			// set position to aim at
-			Vec3d newTargetVec = target.getPos().add(target.getVelocity());
+			Vec3d newTargetVec = target.getEntityPos().add(target.getVelocity());
 			double d = mc.player.getEyePos().distanceTo(target.getBoundingBox().offset(target.getVelocity()).getCenter());
 			double x = newTargetVec.x + (newTargetVec.x - target.getX()) * d - mc.player.getX();
 			double y = newTargetVec.y + (newTargetVec.y - target.getY()) * d + target.getHeight() * 0.5 - mc.player.getY() - mc.player.getEyeHeight(mc.player.getPose());

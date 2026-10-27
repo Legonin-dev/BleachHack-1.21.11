@@ -16,6 +16,7 @@ import org.bleachhack.module.ModuleManager;
 import org.bleachhack.module.mods.BetterPortal;
 import org.bleachhack.module.mods.EntityControl;
 import org.bleachhack.module.mods.Freecam;
+import org.bleachhack.module.mods.NoRender;
 import org.bleachhack.module.mods.NoSlow;
 import org.bleachhack.module.mods.SafeWalk;
 import org.bleachhack.module.mods.Scaffold;
@@ -44,6 +45,8 @@ import net.minecraft.util.math.Vec3d;
 public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
 	@Shadow private float mountJumpStrength;
+	@Shadow public float nauseaIntensity;
+	@Shadow public float lastNauseaIntensity;
 
 	@Shadow private ClientPlayNetworkHandler networkHandler;
 	@Shadow private MinecraftClient client;
@@ -89,6 +92,14 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 		}
 	}
 
+	@Inject(method = "tickNausea", at = @At("RETURN"))
+	private void tickNausea(boolean inPortal, CallbackInfo ci) {
+		if (ModuleManager.getModule(NoRender.class).isOverlayToggled(5)) {
+			this.nauseaIntensity = 0.0F;
+			this.lastNauseaIntensity = 0.0F;
+		}
+	}
+
 	@Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
 	private void pushOutOfBlocks(double x, double d, CallbackInfo ci) {
 		if (ModuleManager.getModule(Freecam.class).isEnabled()) {
@@ -96,7 +107,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 		}
 	}
 
-	@Redirect(method = "updateNausea", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;closeHandledScreen()V", ordinal = 0),
+	@Redirect(method = "tickNausea", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;closeHandledScreen()V", ordinal = 0),
 			require = 0 /* TODO: inertia compatibility */)
 	private void updateNausea_closeHandledScreen(ClientPlayerEntity player) {
 		if (!ModuleManager.getModule(BetterPortal.class).isEnabled()
@@ -105,7 +116,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 		}
 	}
 
-	@Redirect(method = "updateNausea", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;setScreen(Lnet/minecraft/client/gui/screen/Screen;)V", ordinal = 0),
+	@Redirect(method = "tickNausea", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;setScreen(Lnet/minecraft/client/gui/screen/Screen;)V", ordinal = 0),
 			require = 0 /* TODO: inertia compatibility */)
 	private void updateNausea_setScreen(MinecraftClient client, Screen screen) {
 		if (!ModuleManager.getModule(BetterPortal.class).isEnabled()

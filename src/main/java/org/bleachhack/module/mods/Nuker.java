@@ -92,7 +92,7 @@ public class Nuker extends Module {
 
 					double distTo = getSetting(3).asMode().getMode() == 0
 							? MathHelper.absMax(MathHelper.absMax(mc.player.getX() - (pos.getX() + 0.5), mc.player.getEyeY() - (pos.getY() + 0.5)), mc.player.getZ() - (pos.getZ() + 0.5))
-									: mc.player.getPos().distanceTo(Vec3d.ofCenter(pos));
+									: mc.player.getEntityPos().distanceTo(Vec3d.ofCenter(pos));
 
 					BlockState state = mc.world.getBlockState(pos);
 					if (distTo - 0.5 > getSetting(4).asSlider().getValue() || state.isAir() || state.getBlock() instanceof FluidBlock)
@@ -179,7 +179,7 @@ public class Nuker extends Module {
 		}
 
 		if (getSetting(12).asToggle().getState()) {
-			Vec3d pos = mc.player.getPos().subtract(Renderer.getInterpolationOffset(mc.player));
+			Vec3d pos = mc.player.getEntityPos().subtract(Renderer.getInterpolationOffset(mc.player));
 			double range = getSetting(4).asSlider().getValue();
 			int color = 0xff000000 | getSetting(12).asToggle().getChild(1).asColor().getRGB();
 			float width = getSetting(12).asToggle().getChild(0).asSlider().getValueFloat();
@@ -237,7 +237,7 @@ public class Nuker extends Module {
 	private Comparator<BlockPos> getBlockOrderComparator() {
 		// Comparator that moves the block under the player to last
 		// so it doesn't mine itself down without clearing everything above first
-		Comparator<BlockPos> keepBlockUnderComparator = Comparator.comparing(BlockPos.ofFloored(mc.player.getPos().add(0, -0.8, 0))::equals);
+		Comparator<BlockPos> keepBlockUnderComparator = Comparator.comparing(BlockPos.ofFloored(mc.player.getEntityPos().add(0, -0.8, 0))::equals);
 
 		Comparator<BlockPos> distComparator = Comparator.comparingDouble(b -> mc.player.getEyePos().distanceTo(Vec3d.ofCenter(b)));
 		Comparator<BlockPos> hardnessComparator = Comparator.comparing(b -> mc.world.getBlockState(b).getHardness(mc.world, b));

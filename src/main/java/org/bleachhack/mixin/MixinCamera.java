@@ -20,14 +20,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.CameraSubmersionType;
+import net.minecraft.block.enums.CameraSubmersionType;
 
 @Mixin(Camera.class)
 public class MixinCamera {
 
 	@Unique private boolean bypassCameraClip;
 
-	@Shadow private double clipToSpace(double desiredCameraDistance) { return 0; }
+	@Shadow private float clipToSpace(float desiredCameraDistance) { return 0; }
 
 	@Inject(method = "getSubmersionType", at = @At("HEAD"), cancellable = true)
 	private void getSubmergedFluidState(CallbackInfoReturnable<CameraSubmersionType> ci) {
@@ -37,7 +37,7 @@ public class MixinCamera {
 	}
 
 	@Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)
-	private void onClipToSpace(double desiredCameraDistance, CallbackInfoReturnable<Double> info) {
+	private void onClipToSpace(float desiredCameraDistance, CallbackInfoReturnable<Float> info) {
 		if (bypassCameraClip) {
 			bypassCameraClip = false;
 		} else {
@@ -46,10 +46,10 @@ public class MixinCamera {
 			if (betterCamera.isEnabled()) {
 				if (betterCamera.getSetting(0).asToggle().getState()) {
 					info.setReturnValue(betterCamera.getSetting(1).asToggle().getState()
-							? betterCamera.getSetting(1).asToggle().getChild(0).asSlider().getValue() : desiredCameraDistance);
+							? betterCamera.getSetting(1).asToggle().getChild(0).asSlider().getValueFloat() : desiredCameraDistance);
 				} else if (betterCamera.getSetting(1).asToggle().getState()) {
 					bypassCameraClip = true;
-					info.setReturnValue(clipToSpace(betterCamera.getSetting(1).asToggle().getChild(0).asSlider().getValue()));
+					info.setReturnValue(clipToSpace(betterCamera.getSetting(1).asToggle().getChild(0).asSlider().getValueFloat()));
 				}
 			}
 		}

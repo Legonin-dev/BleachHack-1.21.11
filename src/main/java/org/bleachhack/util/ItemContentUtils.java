@@ -9,29 +9,25 @@
 package org.bleachhack.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ContainerComponent;
+import net.minecraft.component.type.WritableBookContentComponent;
+import net.minecraft.component.type.WrittenBookContentComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.text.Text;
+import net.minecraft.util.collection.DefaultedList;
 
 public class ItemContentUtils {
 
 	public static List<ItemStack> getItemsInContainer(ItemStack item) {
-		List<ItemStack> items = new ArrayList<>(Collections.nCopies(27, new ItemStack(Items.AIR)));
-		NbtCompound nbt = item.getOrCreateNbt().contains("BlockEntityTag", 10)
-				? item.getNbt().getCompound("BlockEntityTag") : item.getNbt();
+		DefaultedList<ItemStack> items = DefaultedList.ofSize(27, ItemStack.EMPTY);
+		ContainerComponent container = item.get(DataComponentTypes.CONTAINER);
 
-		if (nbt.contains("Items", 9)) {
-			NbtList nbt2 = nbt.getList("Items", 10);
-			for (int i = 0; i < nbt2.size(); i++) {
-				int slot = nbt2.getCompound(i).contains("Slot", 99) ? nbt2.getCompound(i).getByte("Slot") : i;
-				items.set(slot, ItemStack.fromNbt(nbt2.getCompound(i)));
-			}
+		if (container != null) {
+			container.copyTo(items);
 		}
 
 		return items;
@@ -39,18 +35,18 @@ public class ItemContentUtils {
 
 	public static List<List<String>> getTextInBook(ItemStack item) {
 		List<String> pages = new ArrayList<>();
-		NbtCompound nbt = item.getNbt();
 
-		if (nbt != null && nbt.contains("pages")) {
-			NbtList nbt2 = nbt.getList("pages", 8);
-			for (int i = 0; i < nbt2.size(); i++) {
-				if (item.getItem() == Items.WRITABLE_BOOK) {
-					pages.add(nbt2.getString(i));
-				} else {
-					Text text = Text.Serializer.fromLenientJson(nbt2.getString(i));
+		if (item.getItem() == Items.WRITABLE_BOOK) {
+			WritableBookContentComponent content = item.get(DataComponentTypes.WRITABLE_BOOK_CONTENT);
 
-					pages.add(text != null ? text.getString() : nbt2.getString(i));
-				}
+			if (content != null) {
+				content.pages().forEach(page -> pages.add(page.raw()));
+			}
+		} else {
+			WrittenBookContentComponent content = item.get(DataComponentTypes.WRITTEN_BOOK_CONTENT);
+
+			if (content != null) {
+				content.getPages(false).forEach(page -> pages.add(page.getString()));
 			}
 		}
 

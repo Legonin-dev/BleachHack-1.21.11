@@ -20,8 +20,7 @@ import org.bleachhack.setting.module.SettingMode;
 import org.bleachhack.setting.module.SettingSlider;
 import org.bleachhack.setting.module.SettingToggle;
 
-import net.minecraft.client.render.DimensionEffects;
-import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
+import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 import net.minecraft.util.math.Vec3d;
@@ -78,8 +77,8 @@ public class Ambience extends Module {
 	public void onTick(EventTick event) {
 		if (getSetting(0).asToggle().getState()) {
 			if (!weatherManager.isActive()) {
-				weatherManager.setRain(mc.world.getRainGradient(mc.getTickDelta()));
-				weatherManager.setThunder(mc.world.getThunderGradient(mc.getTickDelta()));
+				weatherManager.setRain(mc.world.getRainGradient(mc.getRenderTickCounter().getTickProgress(false)));
+				weatherManager.setThunder(mc.world.getThunderGradient(mc.getRenderTickCounter().getTickProgress(false)));
 			}
 
 			if (getSetting(0).asToggle().getChild(0).asMode().getMode() == 0) {
@@ -95,7 +94,7 @@ public class Ambience extends Module {
 		}
 
 		if (getSetting(1).asToggle().getState()) {
-			mc.world.setTimeOfDay(getSetting(1).asToggle().getChild(0).asSlider().getValueLong());
+			mc.world.setTime(mc.world.getTime(), getSetting(1).asToggle().getChild(0).asSlider().getValueLong(), true);
 		}
 	}
 
@@ -137,27 +136,6 @@ public class Ambience extends Module {
 		if (getCurrentDimSetting().getState() && getCurrentDimSetting().getChild(0).asToggle().getState()) {
 			int[] color = getCurrentDimSetting().getChild(0).asToggle().getChild(1).asColor().getRGBArray();
 			event.setColor(new Vec3d(color[0] / 255d, color[1] / 255d, color[2] / 255d));
-		}
-	}
-
-	@BleachSubscribe
-	public void onSkyProperties(EventSkyRender.Properties event) {
-		if (getCurrentDimSetting().getState() && getCurrentDimSetting().getChild(0).asToggle().getState()
-				&& getCurrentDimSetting().getChild(0).asToggle().getChild(0).asToggle().getState()) {
-			event.setSky(new DimensionEffects(event.getSky().getCloudsHeight(), false, DimensionEffects.SkyType.END, true, false) {
-
-				public Vec3d adjustFogColor(Vec3d color, float sunHeight) {
-					return color.multiply(0.15000000596046448D);
-				}
-
-				public boolean useThickFog(int camouseX, int camouseY) {
-					return false;
-				}
-
-				public float[] getFogColorOverride(float skyAngle, float tickDelta) {
-					return null;
-				}
-			});
 		}
 	}
 

@@ -65,13 +65,13 @@ public class ClickTp extends Module {
 
 	@BleachSubscribe
 	public void onTick(EventTick event) {
-		if (InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_SHIFT)) {
+		if (InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)) {
 			pos = null;
 			dir = null;
 			return;
 		}
 
-		BlockHitResult hit = (BlockHitResult) mc.player.raycast(100, mc.getTickDelta(), getSetting(1).asToggle().getState());
+		BlockHitResult hit = (BlockHitResult) mc.player.raycast(100, mc.getRenderTickCounter().getTickProgress(false), getSetting(1).asToggle().getState());
 
 		boolean miss = hit.getType() == Type.MISS && !getSetting(0).asToggle().getState();
 
@@ -86,11 +86,11 @@ public class ClickTp extends Module {
 
 				if (getSetting(2).asToggle().getState()) {
 					mc.player.updatePosition(mc.player.getX(), tpPos.y, mc.player.getZ());
-					mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), tpPos.y, mc.player.getZ(), false));
+					mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), tpPos.y, mc.player.getZ(), false, false));
 				}
 
 				mc.player.updatePosition(tpPos.x, tpPos.y, tpPos.z);
-				mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(tpPos.x, tpPos.y, tpPos.z, false));
+				mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(tpPos.x, tpPos.y, tpPos.z, false, false));
 			} else if (GLFW.glfwGetMouseButton(mc.getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_RIGHT) == 0) {
 				antiSpamClick = false;
 			}

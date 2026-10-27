@@ -24,7 +24,7 @@ public class MixinPlayerListHud {
 
 	@Inject(method = "getPlayerName", at = @At("RETURN"), cancellable = true)
 	private void getPlayerName(PlayerListEntry entry, CallbackInfoReturnable<Text> callback) {
-		if (Option.PLAYERLIST_SHOW_FRIENDS.getValue() && BleachHack.friendMang.has(entry.getProfile().getName())) {
+		if (Option.PLAYERLIST_SHOW_FRIENDS.getValue() && BleachHack.friendMang.has(entry.getProfile().name())) {
 			callback.setReturnValue(((MutableText) callback.getReturnValue()).styled(s -> s.withColor(Formatting.AQUA)));
 		}
 	}

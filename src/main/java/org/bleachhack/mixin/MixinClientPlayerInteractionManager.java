@@ -11,7 +11,6 @@ package org.bleachhack.mixin;
 import org.bleachhack.BleachHack;
 import org.bleachhack.event.events.EventBlockBreakCooldown;
 import org.bleachhack.event.events.EventInteract;
-import org.bleachhack.event.events.EventReach;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -98,13 +97,5 @@ public class MixinClientPlayerInteractionManager {
 		if (event.isCancelled()) {
 			callback.setReturnValue(ActionResult.PASS);
 		}
-	}
-
-	@Inject(method = "getReachDistance", at = @At("RETURN"), cancellable = true)
-	private void getReachDistance(CallbackInfoReturnable<Float> callback) {
-		EventReach event = new EventReach(callback.getReturnValueF());
-		BleachHack.eventBus.post(event);
-
-		callback.setReturnValue(event.getReach());
 	}
 }

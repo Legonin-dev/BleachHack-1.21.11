@@ -36,7 +36,7 @@ public class Ghosthand extends Module {
 			return;
 
 		// Return if we are looking at any block entities
-		BlockPos lookingPos = BlockPos.ofFloored(mc.player.raycast(4.25, mc.getTickDelta(), false).getPos());
+		BlockPos lookingPos = BlockPos.ofFloored(mc.player.raycast(4.25, mc.getRenderTickCounter().getTickProgress(false), false).getPos());
 		for (BlockEntity b : WorldUtils.getBlockEntities()) {
 			if (lookingPos.equals(b.getPos())) {
 				return;
@@ -50,7 +50,7 @@ public class Ghosthand extends Module {
 				.rotateY(-(float) Math.toRadians(mc.player.getYaw()));
 
 		for (int i = 1; i < 50; i++) {
-			BlockPos curPos = BlockPos.ofFloored(mc.player.getCameraPosVec(mc.getTickDelta()).add(nextPos.multiply(i)));
+			BlockPos curPos = BlockPos.ofFloored(mc.player.getCameraPosVec(mc.getRenderTickCounter().getTickProgress(false)).add(nextPos.multiply(i)));
 			if (!posList.contains(curPos)) {
 				posList.add(curPos);
 	

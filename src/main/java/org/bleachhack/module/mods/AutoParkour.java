@@ -73,15 +73,15 @@ public class AutoParkour extends Module {
 				}
 
 				if (getSetting(1).asToggle().getState()) {
-					Vec3d lookVec = mc.player.getPos().add(new Vec3d(0, 0, 3.5).rotateY(-(float) Math.toRadians(mc.player.getYaw())));
+					Vec3d lookVec = mc.player.getEntityPos().add(new Vec3d(0, 0, 3.5).rotateY(-(float) Math.toRadians(mc.player.getYaw())));
 
 					BlockPos nearestPos = BlockPos.streamOutwards(mc.player.getBlockPos().down(), 4, 1, 4)
 							.map(BlockPos::toImmutable)
-							.filter(pos -> (mc.world.isTopSolid(pos, mc.player) && !mc.world.getBlockCollisions(mc.player, new Box(pos.up(), pos.add(1, 3, 1))).iterator().hasNext())
+							.filter(pos -> (mc.world.isTopSolid(pos, mc.player) && !mc.world.getBlockCollisions(mc.player, Box.enclosing(pos.up(), pos.add(1, 3, 1))).iterator().hasNext())
 									|| mc.world.getBlockState(pos).getBlock() instanceof LadderBlock
 									|| mc.world.getBlockState(pos.up()).getBlock() instanceof LadderBlock)
-							.filter(pos -> mc.player.getPos().distanceTo(Vec3d.of(pos).add(0.5, 1, 0.5)) >= 1)
-							.filter(pos -> mc.player.getPos().distanceTo(Vec3d.of(pos).add(0.5, 1, 0.5)) <= 4.5 /* ? */)
+							.filter(pos -> mc.player.getEntityPos().distanceTo(Vec3d.of(pos).add(0.5, 1, 0.5)) >= 1)
+							.filter(pos -> mc.player.getEntityPos().distanceTo(Vec3d.of(pos).add(0.5, 1, 0.5)) <= 4.5 /* ? */)
 							.sorted(Comparator.comparing(pos -> pos.getSquaredDistance(lookVec)))
 							.findFirst().orElse(null);
 

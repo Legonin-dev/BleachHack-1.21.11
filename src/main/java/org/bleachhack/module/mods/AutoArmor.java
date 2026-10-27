@@ -20,15 +20,14 @@ import org.bleachhack.setting.module.SettingSlider;
 import org.bleachhack.setting.module.SettingToggle;
 import org.bleachhack.util.BleachQueue;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.ProtectionEnchantment;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.AttributeModifiersComponent;
+import net.minecraft.component.type.EquippableComponent;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.ToolItem;
+import org.bleachhack.util.EnchantmentUtils;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 
@@ -76,9 +75,9 @@ public class AutoArmor extends Module {
 						if (mc.player.getInventory().getStack(s).isEmpty()) {
 							mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, armorSlot, 1, SlotActionType.QUICK_MOVE, mc.player);
 							return;
-						} else if (!(mc.player.getInventory().getStack(s).getItem() instanceof ToolItem)
-								&& !(mc.player.getInventory().getStack(s).getItem() instanceof ArmorItem)
-								&& !(mc.player.getInventory().getStack(s).getItem() instanceof ElytraItem)
+						} else if (!isTool(mc.player.getInventory().getStack(s))
+								&& !isArmor(mc.player.getInventory().getStack(s))
+								&& !mc.player.getInventory().getStack(s).isOf(Items.ELYTRA)
 								&& mc.player.getInventory().getStack(s).getItem() != Items.TOTEM_OF_UNDYING && forceMoveSlot == -1) {
 							forceMoveSlot = s;
 						}
@@ -104,8 +103,8 @@ public class AutoArmor extends Module {
 			int prot = getProtection(mc.player.getInventory().getStack(s));
 
 			if (prot > 0) {
-				EquipmentSlot slot = (mc.player.getInventory().getStack(s).getItem() instanceof ElytraItem
-						? EquipmentSlot.CHEST : ((ArmorItem) mc.player.getInventory().getStack(s).getItem()).getSlotType());
+				EquipmentSlot slot = mc.player.getInventory().getStack(s).isOf(Items.ELYTRA)
+						? EquipmentSlot.CHEST : getArmorSlot(mc.player.getInventory().getStack(s));
 
 				for (Entry<EquipmentSlot, int[]> e: armorMap.entrySet()) {
 					if (e.getKey() == slot) {
@@ -121,8 +120,8 @@ public class AutoArmor extends Module {
 		for (Entry<EquipmentSlot, int[]> e: armorMap.entrySet()) {
 			if (e.getValue()[2] != -1) {
 				if (e.getValue()[1] == -1 && e.getValue()[2] < 9) {
-					if (e.getValue()[2] != mc.player.getInventory().selectedSlot) {
-						mc.player.getInventory().selectedSlot = e.getValue()[2];
+					if (e.getValue()[2] != mc.player.getInventory().getSelectedSlot()) {
+						mc.player.getInventory().setSelectedSlot(e.getValue()[2]);
 						mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(e.getValue()[2]));
 					}
 
@@ -144,31 +143,54 @@ public class AutoArmor extends Module {
 		}
 	}
 
+	private static boolean isArmor(ItemStack is) {
+		EquippableComponent equippable = is.get(DataComponentTypes.EQUIPPABLE);
+		return equippable != null && equippable.slot().getType() == EquipmentSlot.Type.HUMANOID_ARMOR;
+	}
+
+	private static boolean isTool(ItemStack is) {
+		return is.contains(DataComponentTypes.TOOL);
+	}
+
+	private static EquipmentSlot getArmorSlot(ItemStack is) {
+		EquippableComponent equippable = is.get(DataComponentTypes.EQUIPPABLE);
+		return equippable != null ? equippable.slot() : null;
+	}
+
+	private static double getArmorPoints(ItemStack is) {
+		AttributeModifiersComponent modifiers = is.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+
+		if (modifiers == null)
+			return 0;
+
+		double points = 0;
+		for (AttributeModifiersComponent.Entry e: modifiers.modifiers()) {
+			if (e.attribute().equals(net.minecraft.entity.attribute.EntityAttributes.ARMOR))
+				points += e.modifier().value();
+		}
+
+		return points;
+	}
+
 	private int getProtection(ItemStack is) {
-		if (is.getItem() instanceof ArmorItem || is.getItem() == Items.ELYTRA) {
+		if (isArmor(is) || is.isOf(Items.ELYTRA)) {
 			int prot = 0;
 
-			if (is.getItem() instanceof ElytraItem) {
-				if (!ElytraItem.isUsable(is))
+			if (is.isOf(Items.ELYTRA)) {
+				if (is.getMaxDamage() - is.getDamage() <= 1)
 					return 0;
 
-				if (getSetting(1).asToggle().getState()) {
-					prot = 32767;
-				} else {
-					prot = 1;
-				}
+				prot = getSetting(1).asToggle().getState() ? 32767 : 1;
 			} else if (is.getMaxDamage() - is.getDamage() < 7 && getSetting(0).asToggle().getState()) {
 				return 0;
 			}
 
-			if (is.hasEnchantments()) {
-				for (Entry<Enchantment, Integer> e: EnchantmentHelper.get(is).entrySet()) {
-					if (e.getKey() instanceof ProtectionEnchantment)
-						prot += e.getValue();
-				}
-			}
+			prot += EnchantmentUtils.getLevel(Enchantments.PROTECTION, is);
+			prot += EnchantmentUtils.getLevel(Enchantments.FIRE_PROTECTION, is);
+			prot += EnchantmentUtils.getLevel(Enchantments.BLAST_PROTECTION, is);
+			prot += EnchantmentUtils.getLevel(Enchantments.PROJECTILE_PROTECTION, is);
 
-			return (is.getItem() instanceof ArmorItem ? ((ArmorItem) is.getItem()).getProtection() : 0) + prot;
+			return (int) getArmorPoints(is) + prot;
 		} else if (!is.isEmpty()) {
 			return 0;
 		}

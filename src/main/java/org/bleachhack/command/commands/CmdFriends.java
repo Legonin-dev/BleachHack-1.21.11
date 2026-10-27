@@ -22,6 +22,7 @@ import org.bleachhack.command.exception.CmdSyntaxException;
 import org.bleachhack.util.BleachLogger;
 import org.bleachhack.util.io.BleachFileHelper;
 
+import java.net.URI;
 import java.util.Locale;
 
 public class CmdFriends extends Command {
@@ -70,13 +71,13 @@ public class CmdFriends extends Command {
 									.withColor(BleachLogger.INFO_COLOR)))
 					.append(Text.literal("\u00a7c[Del]")
 							.styled(style -> style
-									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Remove " + f + " from your friendlist")))
-									.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, getPrefix() + "friends remove " + f))))
+									.withHoverEvent(new HoverEvent.ShowText(Text.literal("Remove " + f + " from your friendlist")))
+									.withClickEvent(new ClickEvent.RunCommand(getPrefix() + "friends remove " + f))))
 					.append("   ")
 					.append(Text.literal("\u00a73[NameMC]")
 							.styled(style -> style
-									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Open NameMC page of " + f)))
-									.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://namemc.com/profile/" + f))));
+									.withHoverEvent(new HoverEvent.ShowText(Text.literal("Open NameMC page of " + f)))
+									.withClickEvent(new ClickEvent.OpenUrl(URI.create("https://namemc.com/profile/" + f)))));
 				}
 
 				BleachLogger.info(text);

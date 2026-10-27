@@ -92,7 +92,7 @@ public class SettingDataHandlers {
 		}
 
 		public Block read(JsonElement json) {
-			Block bl = Registries.BLOCK.get(new Identifier(json.getAsString()));
+			Block bl = Registries.BLOCK.get(Identifier.of(json.getAsString()));
 			return bl != Blocks.AIR ? bl : null;
 		}
 	};
@@ -103,7 +103,7 @@ public class SettingDataHandlers {
 		}
 
 		public Item read(JsonElement json) {
-			Item item = Registries.ITEM.get(new Identifier(json.getAsString()));
+			Item item = Registries.ITEM.get(Identifier.of(json.getAsString()));
 			return item != Items.AIR ? item : null;
 		}
 	};

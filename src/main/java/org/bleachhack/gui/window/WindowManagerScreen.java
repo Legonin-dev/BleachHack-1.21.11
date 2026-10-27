@@ -11,10 +11,11 @@ package org.bleachhack.gui.window;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bleachhack.gui.window.widget.WindowButtonWidget;
-import com.mojang.blaze3d.systems.RenderSystem;
-
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
@@ -53,7 +54,7 @@ public class WindowManagerScreen extends WindowScreen {
 			remove(t.getLeft());
 		}
 
-		getSelectedScreen().init(client, width, height - 16);
+		getSelectedScreen().init(width, height - 16);
 		addDrawable(getSelectedScreen());
 		((List<Element>) children()).add(getSelectedScreen());
 	}
@@ -77,23 +78,42 @@ public class WindowManagerScreen extends WindowScreen {
 		super.tick();
 	}
 
+	// Children don't get their mouse release/drag events when the click wasn't consumed by them
+	@Override
+	public boolean mouseReleased(Click click) {
+		boolean childDragging = isDragging();
+		boolean handled = super.mouseReleased(click);
+
+		if (!childDragging) {
+			handled |= getSelectedScreen().mouseReleased(click);
+		}
+
+		return handled;
+	}
+
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+		return getSelectedScreen().mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)
+				|| super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+	}
+
 	// Children also don't take keyboard input brueh
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		getSelectedScreen().keyPressed(keyCode, scanCode, modifiers);
-		return super.keyPressed(keyCode, scanCode, modifiers);
+	public boolean keyPressed(KeyInput input) {
+		getSelectedScreen().keyPressed(input);
+		return super.keyPressed(input);
 	}
 
 	@Override
-	public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-		getSelectedScreen().keyReleased(keyCode, scanCode, modifiers);
-		return super.keyReleased(keyCode, scanCode, modifiers);
+	public boolean keyReleased(KeyInput input) {
+		getSelectedScreen().keyReleased(input);
+		return super.keyReleased(input);
 	}
 
 	@Override
-	public boolean charTyped(char chr, int modifiers) {
-		getSelectedScreen().charTyped(chr, modifiers);
-		return super.charTyped(chr, modifiers);
+	public boolean charTyped(CharInput input) {
+		getSelectedScreen().charTyped(input);
+		return super.charTyped(input);
 	}
 
 	private static class WindowTabButtonWidget extends WindowButtonWidget {
@@ -106,26 +126,26 @@ public class WindowManagerScreen extends WindowScreen {
 		}
 
 		@Override
-		public void render(MatrixStack matrices, int windowX, int windowY, int mouseX, int mouseY) {
+		public void render(DrawContext ctx, int windowX, int windowY, int mouseX, int mouseY) {
 			int bx1 = windowX + x1;
 			int by1 = windowY + y1;
 			int bx2 = windowX + x2;
 			int by2 = windowY + y2;
 
-			Window.fill(matrices,
+			Window.fill(ctx,
 					bx1, by1, bx2, by2,
 					colorTop, colorBottom,
 					isInBounds(windowX, windowY, mouseX, mouseY) ? colorHoverFill : colorFill);
 
-			RenderSystem.getModelViewStack().push();
-			RenderSystem.getModelViewStack().scale(0.7f, 0.7f, 1f);
+			ctx.getMatrices().pushMatrix();
+			ctx.getMatrices().translate((float) (bx1 + 2), (float) (by1 - 6 + (by2 - by1) / 2.0));
+			ctx.getMatrices().scale(0.7f, 0.7f);
 
-			mc.getItemRenderer().renderGuiItemIcon(matrices, item, (int) ((bx1 + 2) / 0.7), (int) ((by1 - 6 + (by2 - by1) / 2.0) / 0.7));
+			ctx.drawItem(item, 0, 0);
 
-			RenderSystem.getModelViewStack().pop();
-			RenderSystem.applyModelViewMatrix();
+			ctx.getMatrices().popMatrix();
 
-			mc.textRenderer.drawWithShadow(matrices, text, bx1 + 16, by1 + (by2 - by1) / 2 - 4, -1);
+			ctx.drawTextWithShadow(mc.textRenderer, text, bx1 + 16, by1 + (by2 - by1) / 2 - 4, -1);
 		}
 	}
 }

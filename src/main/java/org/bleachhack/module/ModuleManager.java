@@ -81,7 +81,7 @@ public class ModuleManager {
 	}
 
 	public static void handleKey(int key) {
-		if (!InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_F3)) {
+		if (!InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow(), GLFW.GLFW_KEY_F3)) {
 			for (Module m: getModules()) {
 				if (m.getKey() == key) {
 					m.toggle();

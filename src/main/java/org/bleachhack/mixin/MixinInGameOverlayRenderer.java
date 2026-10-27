@@ -17,20 +17,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameOverlayRenderer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 
 @Mixin(InGameOverlayRenderer.class)
 public class MixinInGameOverlayRenderer {
 
 	@Inject(method = "renderFireOverlay", at = @At("HEAD"), cancellable = true)
-	private static void onRenderFireOverlay(MinecraftClient minecraftClient, MatrixStack matrixStack, CallbackInfo ci) {
+	private static void onRenderFireOverlay(MatrixStack matrixStack, VertexConsumerProvider vertexConsumers, Sprite sprite, CallbackInfo ci) {
 		if (ModuleManager.getModule(NoRender.class).isOverlayToggled(1)) {
 			ci.cancel();
 		}
 	}
 
 	@Inject(method = "renderUnderwaterOverlay", at = @At("HEAD"), cancellable = true)
-	private static void onRenderUnderwaterOverlay(MinecraftClient minecraftClient, MatrixStack matrixStack, CallbackInfo ci) {
+	private static void onRenderUnderwaterOverlay(MinecraftClient minecraftClient, MatrixStack matrixStack, VertexConsumerProvider vertexConsumers, CallbackInfo ci) {
 		if (ModuleManager.getModule(NoRender.class).isOverlayToggled(3)) {
 			ci.cancel();
 		}

@@ -3,6 +3,7 @@ package org.bleachhack.module.mods;
 import org.bleachhack.event.events.EventTick;
 import org.bleachhack.eventbus.BleachSubscribe;
 import org.bleachhack.module.Module;
+import org.bleachhack.util.EnchantmentUtils;
 import org.bleachhack.module.ModuleCategory;
 import org.bleachhack.setting.module.SettingItemList;
 import org.bleachhack.util.BleachLogger;
@@ -78,19 +79,15 @@ public class AutoGrind extends Module {
 	}
 
 	private int getEnchantCount(ItemStack stack) {
-		// get the number of entries from EnchantmentHelper.get(stack)
-		return EnchantmentHelper.get(stack).size();
+		// get the number of entries from the stack's enchantment component
+		return EnchantmentHelper.getEnchantments(stack).getSize();
 	}
 
 	private int getCurseCount(ItemStack stack) {
 		// needed as EnchantmentHelper's curse checks are bugged for Enchanted Books
 		int curses = 0;
-		if (EnchantmentHelper.get(stack).containsKey(Enchantments.BINDING_CURSE)) {
-			curses += EnchantmentHelper.get(stack).get(Enchantments.BINDING_CURSE);
-		}
-		if (EnchantmentHelper.get(stack).containsKey(Enchantments.VANISHING_CURSE)) {
-			curses += EnchantmentHelper.get(stack).get(Enchantments.VANISHING_CURSE);
-		}
+		curses += EnchantmentUtils.getLevel(Enchantments.BINDING_CURSE, stack);
+		curses += EnchantmentUtils.getLevel(Enchantments.VANISHING_CURSE, stack);
 		return curses;
 	}
 }

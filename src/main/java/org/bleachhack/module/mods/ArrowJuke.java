@@ -74,7 +74,7 @@ public class ArrowJuke extends Module {
 							} else {
 								mc.player.updatePosition(mc.player.getX() + vel.x, mc.player.getY() + vel.y, mc.player.getZ() + vel.z);
 								mc.player.networkHandler.sendPacket(
-										new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), false));
+										new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), false, false));
 							}
 
 							return;

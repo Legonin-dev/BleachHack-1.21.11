@@ -10,6 +10,8 @@ package org.bleachhack.command.commands;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.command.permission.LeveledPermissionPredicate;
+import net.minecraft.command.permission.PermissionPredicate;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 import net.minecraft.text.ClickEvent;
@@ -115,8 +117,8 @@ public class CmdServer extends Command {
 	public Text createText(String name, String value) {
 		boolean newlines = value.contains("\n");
 		return Text.literal("\u00a77" + name + "\u00a7f:" + (newlines ? "\n" : " " ) + "\u00a7a" + value).styled(style -> style
-				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to copy to clipboard")))
-				.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, Formatting.strip(value))));
+				.withHoverEvent(new HoverEvent.ShowText(Text.literal("Click to copy to clipboard")))
+				.withClickEvent(new ClickEvent.CopyToClipboard(Formatting.strip(value))));
 	}
 
 	public void checkForPlugins() {
@@ -146,7 +148,8 @@ public class CmdServer extends Command {
 		if (singleplayer)
 			return "Integrated Server";
 
-		return mc.player.getServerBrand() != null ? mc.player.getServerBrand() : "Unknown";
+		return mc.getNetworkHandler() != null && mc.getNetworkHandler().getBrand() != null
+				? mc.getNetworkHandler().getBrand() : "Unknown";
 	}
 
 	public String getDay(boolean singleplayer) {
@@ -154,7 +157,7 @@ public class CmdServer extends Command {
 	}
 
 	public String getDifficulty(boolean singleplayer) {
-		return StringUtils.capitalize(mc.world.getDifficulty().getName()) + " (Local: " + mc.world.getLocalDifficulty(mc.player.getBlockPos()).getLocalDifficulty() + ")";
+		return StringUtils.capitalize(mc.world.getDifficulty().getName());
 	}
 
 	public String getIP(boolean singleplayer) {
@@ -176,13 +179,13 @@ public class CmdServer extends Command {
 	}
 
 	public String getPing(boolean singleplayer) {
-		PlayerListEntry playerEntry = mc.player.networkHandler.getPlayerListEntry(mc.player.getGameProfile().getId());
+		PlayerListEntry playerEntry = mc.player.networkHandler.getPlayerListEntry(mc.player.getGameProfile().id());
 		return playerEntry == null ? "0" : Integer.toString(playerEntry.getLatency());
 	}
 
 	public String getPerms(boolean singleplayer) {
-		int p = 0;
-		while (mc.player.hasPermissionLevel(p + 1) && p < 5) p++;
+		PermissionPredicate permissions = mc.player.getPermissions();
+		int p = permissions instanceof LeveledPermissionPredicate leveled ? leveled.getLevel().getLevel() : 0;
 
 		return switch (p) {
 			case 0 -> "0 (No Perms)";
@@ -203,8 +206,8 @@ public class CmdServer extends Command {
 
 	public String getVersion(boolean singleplayer) {
 		if (singleplayer)
-			return SharedConstants.getGameVersion().getName();
+			return SharedConstants.getGameVersion().name();
 
-		return mc.getCurrentServerEntry().version != null ? mc.getCurrentServerEntry().version.getString() : "Unknown (" + SharedConstants.getGameVersion().getName() + ")";
+		return mc.getCurrentServerEntry().version != null ? mc.getCurrentServerEntry().version.getString() : "Unknown (" + SharedConstants.getGameVersion().name() + ")";
 	}
 }

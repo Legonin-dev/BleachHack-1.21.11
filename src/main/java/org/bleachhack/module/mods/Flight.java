@@ -45,8 +45,8 @@ public class Flight extends Module {
 		float speed = getSetting(1).asSlider().getValueFloat();
 
 		if (mc.player.age % 20 == 0 && getSetting(2).asMode().getMode() == 3 && !(getSetting(0).asMode().getMode() == 1)) {
-			mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() - 0.069, mc.player.getZ(), false));
-			mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getZ() + 0.069, mc.player.getZ(), true));
+			mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() - 0.069, mc.player.getZ(), false, false));
+			mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getZ() + 0.069, mc.player.getZ(), true, false));
 		}
 
 		if (getSetting(0).asMode().getMode() == 0) {
@@ -54,15 +54,15 @@ public class Flight extends Module {
 
 			if (getSetting(2).asMode().getMode() == 1
 					&& mc.player.age % 20 == 0
-					&& mc.world.getBlockState(BlockPos.ofFloored(mc.player.getPos().add(0, -0.069, 0))).getMaterial().isReplaceable()) {
+					&& mc.world.getBlockState(BlockPos.ofFloored(mc.player.getEntityPos().add(0, -0.069, 0))).isReplaceable()) {
 				antiKickVel = antiKickVel.add(0, -0.069, 0);
 			} else if (getSetting(2).asMode().getMode() == 2) {
 				if (mc.player.age % 40 == 0) {
-					if (mc.world.getBlockState(BlockPos.ofFloored(mc.player.getPos().add(0, 0.15, 0))).getMaterial().isReplaceable()) {
+					if (mc.world.getBlockState(BlockPos.ofFloored(mc.player.getEntityPos().add(0, 0.15, 0))).isReplaceable()) {
 						antiKickVel = antiKickVel.add(0, 0.15, 0);
 					}
 				} else if (mc.player.age % 20 == 0) {
-					if (mc.world.getBlockState(BlockPos.ofFloored(mc.player.getPos().add(0, -0.15, 0))).getMaterial().isReplaceable()) {
+					if (mc.world.getBlockState(BlockPos.ofFloored(mc.player.getEntityPos().add(0, -0.15, 0))).isReplaceable()) {
 						antiKickVel = antiKickVel.add(0, -0.15, 0);
 					}
 				}
@@ -91,10 +91,10 @@ public class Flight extends Module {
 				return;
 			mc.player.setVelocity(mc.player.getVelocity().x, speed / 3, mc.player.getVelocity().z);
 		} else if (getSetting(0).asMode().getMode() == 2) {
-			if (InputUtil.isKeyPressed(mc.getWindow().getHandle(), InputUtil.fromTranslationKey(mc.options.jumpKey.getBoundKeyTranslationKey()).getCode())) {
+			if (InputUtil.isKeyPressed(mc.getWindow(), InputUtil.fromTranslationKey(mc.options.jumpKey.getBoundKeyTranslationKey()).getCode())) {
 				mc.player.jump();
 			} else {
-				if (InputUtil.isKeyPressed(mc.getWindow().getHandle(), InputUtil.fromTranslationKey(mc.options.jumpKey.getBoundKeyTranslationKey()).getCode())) {
+				if (InputUtil.isKeyPressed(mc.getWindow(), InputUtil.fromTranslationKey(mc.options.jumpKey.getBoundKeyTranslationKey()).getCode())) {
 					mc.player.updatePosition(mc.player.getX(), mc.player.getY() - speed / 10f, mc.player.getZ());
 				}
 			}

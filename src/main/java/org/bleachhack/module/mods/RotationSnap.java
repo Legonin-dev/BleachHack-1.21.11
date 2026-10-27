@@ -45,31 +45,31 @@ public class RotationSnap extends Module {
 			int yAngle = yMode == 0 ? 45 : yMode == 1 ? 30 : yMode == 2 ? 15 : 90;
 			int pAngle = pMode == 0 ? 45 : pMode == 1 ? 30 : pMode == 2 ? 15 : 90;
 
-			if (InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_LEFT) && !lDown) {
+			if (InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_LEFT) && !lDown) {
 				mc.player.setYaw(mc.player.getYaw() - yAngle);
 				lDown = true;
-			} else if (!InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_LEFT)) {
+			} else if (!InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_LEFT)) {
 				lDown = false;
 			}
 
-			if (InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_RIGHT) && !rDown) {
+			if (InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_RIGHT) && !rDown) {
 				mc.player.setYaw(mc.player.getYaw() + yAngle);
 				rDown = true;
-			} else if (!InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_RIGHT)) {
+			} else if (!InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_RIGHT)) {
 				rDown = false;
 			}
 
-			if (InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_UP) && !uDown) {
+			if (InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_UP) && !uDown) {
 				mc.player.setPitch(MathHelper.clamp(mc.player.getPitch() - pAngle, -90, 90));
 				uDown = true;
-			} else if (!InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_UP)) {
+			} else if (!InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_UP)) {
 				uDown = false;
 			}
 
-			if (InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_DOWN) && !dDown) {
+			if (InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_DOWN) && !dDown) {
 				mc.player.setPitch(MathHelper.clamp(mc.player.getPitch() + pAngle, -90, 90));
 				dDown = true;
-			} else if (!InputUtil.isKeyPressed(mc.getWindow().getHandle(), GLFW.GLFW_KEY_DOWN)) {
+			} else if (!InputUtil.isKeyPressed(mc.getWindow(), GLFW.GLFW_KEY_DOWN)) {
 				dDown = false;
 			}
 		}

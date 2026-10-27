@@ -46,7 +46,7 @@ public class CmdHelp extends Command {
 
 			BleachLogger.noPrefix(
 					text.styled(style -> style
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, c.getHelpTooltip()))));
+							.withHoverEvent(new HoverEvent.ShowText(c.getHelpTooltip()))));
 		}
 	}
 

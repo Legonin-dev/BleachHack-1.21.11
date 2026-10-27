@@ -72,7 +72,7 @@ public class Killaura extends Module {
 		int reqDelay = (int) Math.rint(20 / getSetting(12).asSlider().getValue());
 
 		boolean cooldownDone = getSetting(10).asToggle().getState()
-				? mc.player.getAttackCooldownProgress(mc.getTickDelta()) == 1.0f
+				? mc.player.getAttackCooldownProgress(mc.getRenderTickCounter().getTickProgress(false)) == 1.0f
 				: (delay > reqDelay || reqDelay == 0);
 
 		if (cooldownDone) {

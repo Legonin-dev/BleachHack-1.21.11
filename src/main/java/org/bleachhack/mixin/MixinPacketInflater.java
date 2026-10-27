@@ -16,7 +16,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.PacketInflater;
+import net.minecraft.network.handler.PacketInflater;
 
 @Mixin(PacketInflater.class)
 public class MixinPacketInflater {

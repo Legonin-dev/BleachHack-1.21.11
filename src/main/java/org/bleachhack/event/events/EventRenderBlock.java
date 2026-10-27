@@ -11,7 +11,7 @@ package org.bleachhack.event.events;
 import org.bleachhack.event.Event;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.BlockRenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
@@ -107,17 +107,17 @@ public class EventRenderBlock extends Event {
 
 	public static class Layer extends EventRenderBlock {
 
-		private RenderLayer layer;
+		private BlockRenderLayer layer;
 
 		public Layer(BlockState state) {
 			super(state);
 		}
 
-		public RenderLayer getLayer() {
+		public BlockRenderLayer getLayer() {
 			return layer;
 		}
 
-		public void setLayer(RenderLayer layer) {
+		public void setLayer(BlockRenderLayer layer) {
 			this.layer = layer;
 		}
 	}

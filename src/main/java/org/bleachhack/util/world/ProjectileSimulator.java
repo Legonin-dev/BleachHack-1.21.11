@@ -15,8 +15,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.TridentEntity;
 import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
+import net.minecraft.entity.projectile.thrown.LingeringPotionEntity;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.entity.projectile.thrown.SnowballEntity;
+import net.minecraft.entity.projectile.thrown.SplashPotionEntity;
 import net.minecraft.entity.projectile.thrown.ThrownEntity;
 import net.minecraft.item.*;
 import net.minecraft.predicate.entity.EntityPredicates;
@@ -37,10 +39,10 @@ public class ProjectileSimulator {
 	private static MinecraftClient mc = MinecraftClient.getInstance();
 
 	public static Entity summonProjectile(PlayerEntity thrower, boolean allowThrowables, boolean allowXp, boolean allowPotions) {
-		ItemStack hand = (isThrowable(thrower.getInventory().getMainHandStack().getItem(), allowThrowables, allowXp, allowPotions)
-				? thrower.getInventory().getMainHandStack()
-				: isThrowable(thrower.getInventory().offHand.get(0).getItem(), allowThrowables, allowXp, allowPotions)
-				? thrower.getInventory().offHand.get(0)
+		ItemStack hand = (isThrowable(thrower.getMainHandStack().getItem(), allowThrowables, allowXp, allowPotions)
+				? thrower.getMainHandStack()
+				: isThrowable(thrower.getOffHandStack().getItem(), allowThrowables, allowXp, allowPotions)
+				? thrower.getOffHandStack()
 				: null);
 
 		if (hand == null) {
@@ -52,20 +54,22 @@ public class ProjectileSimulator {
 					: hand.getItem() == Items.CROSSBOW ? 0f : BowItem.getPullProgress(thrower.getItemUseTime());
 
 			if (charged > 0f) {
-				Entity e = new ArrowEntity(mc.world, mc.player);
+				Entity e = new ArrowEntity(mc.world, mc.player, hand, hand);
 				initProjectile(e, thrower, 0f, charged * 3);
 				return e;
 			}
 		} else if (hand.getItem() instanceof SnowballItem || hand.getItem() instanceof EggItem || hand.getItem() instanceof EnderPearlItem) {
-			Entity e = new SnowballEntity(mc.world, mc.player);
+			Entity e = new SnowballEntity(mc.world, mc.player, hand);
 			initProjectile(e, thrower, 0f, 1.5f);
 			return e;
 		} else if (hand.getItem() instanceof ExperienceBottleItem) {
-			Entity e = new ExperienceBottleEntity(mc.world, mc.player);
+			Entity e = new ExperienceBottleEntity(mc.world, mc.player, hand);
 			initProjectile(e, thrower, -20f, 0.7f);
 			return e;
 		} else if (hand.getItem() instanceof ThrowablePotionItem) {
-			Entity e = new PotionEntity(mc.world, mc.player);
+			Entity e = hand.getItem() instanceof LingeringPotionItem
+					? new LingeringPotionEntity(mc.world, mc.player, hand)
+					: new SplashPotionEntity(mc.world, mc.player, hand);
 			initProjectile(e, thrower, -20f, 0.5f);
 			return e;
 		} else if (hand.getItem() instanceof TridentItem) {
@@ -98,8 +102,8 @@ public class ProjectileSimulator {
 		float float_3 = MathHelper.sqrt((float) velVec.horizontalLengthSquared());
 		e.setYaw((float) (MathHelper.atan2(velVec.x, velVec.z) * 57.2957763671875));
 		e.setPitch((float) (MathHelper.atan2(velVec.y, float_3) * 57.2957763671875));
-		e.prevYaw = e.getYaw();
-		e.prevPitch = e.getPitch();
+		e.lastYaw = e.getYaw();
+		e.lastPitch = e.getPitch();
 
 		e.setVelocity(velVec.add(thrower.getVelocity().x, thrower.isOnGround() ? 0.0D : thrower.getVelocity().y, thrower.getVelocity().z));
 	}
@@ -111,7 +115,7 @@ public class ProjectileSimulator {
 		for (int i = 0; i < 100; i++) {
 			Vec3d vel = spoofE.velocity;
 			Vec3d newVec = spoofE.getPos().add(vel);
-			// EntityHitResult entityHit = ProjectileUtil.raycast(mc.player, e.getPos(),
+			// EntityHitResult entityHit = ProjectileUtil.raycast(mc.player, e.getEntityPos(),
 			// newVec, e.getBoundingBox(), null, 1f);
 			List<LivingEntity> entities = mc.world.getEntitiesByClass(LivingEntity.class, spoofE.getBoundingBox().expand(0.15),
 					EntityPredicates.VALID_LIVING_ENTITY.and(en -> en != mc.player && en != e));

@@ -16,14 +16,16 @@ import org.bleachhack.module.ModuleCategory;
 import org.bleachhack.setting.module.SettingSlider;
 import org.bleachhack.setting.module.SettingToggle;
 
-import net.minecraft.client.gui.screen.ConnectScreen;
+import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
+import net.minecraft.client.network.CookieStorage;
+import net.minecraft.network.DisconnectionInfo;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.network.packet.c2s.handshake.HandshakeC2SPacket;
 import net.minecraft.text.Text;
 
@@ -51,7 +53,7 @@ public class AutoReconnect extends Module {
 	public void sendPacket(EventPacket.Send event) {
 		if (event.getPacket() instanceof HandshakeC2SPacket) {
 			HandshakeC2SPacket packet = (HandshakeC2SPacket) event.getPacket();
-			server = new ServerInfo("Server", packet.getAddress() + ":" + packet.getPort(), false);
+			server = new ServerInfo("Server", packet.address() + ":" + packet.port(), ServerInfo.ServerType.OTHER);
 		}
 	}
 
@@ -62,18 +64,18 @@ public class AutoReconnect extends Module {
 		private ButtonWidget reconnectButton;
 
 		public NewDisconnectScreen(DisconnectedScreen screen) {
-			super(screen.parent, screen.getTitle(), screen.reason);
+			super(screen.parent, screen.getTitle(), new DisconnectionInfo(Text.literal("Disconnected")));
 		}
 
 		public void init() {
 			super.init();
 
 			reconnectTime = System.currentTimeMillis();
-			int buttonH = Math.min(height / 2 + this.reasonHeight / 2 + 9, height - 30);
+			int buttonH = Math.min(height / 2 + 20, height - 30);
 
 			addDrawableChild(ButtonWidget.builder(Text.literal("Reconnect"), button -> {
 				if (server != null)
-					ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client, ServerAddress.parse(server.address), server);
+					ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client, ServerAddress.parse(server.address), server, false, new CookieStorage(new java.util.HashMap<>(), new java.util.HashMap<>(), false));
 			}).position(width / 2 - 100, buttonH + 22).size(200, 20).build());
 			reconnectButton = addDrawableChild(ButtonWidget.builder(Text.empty(), button -> {
 				getSetting(0).asToggle().setValue(!getSetting(0).asToggle().getState());
@@ -81,8 +83,8 @@ public class AutoReconnect extends Module {
 			}).position(width / 2 - 100, buttonH + 44).size(200, 20).build());
 		}
 
-		public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-			super.render(matrices, mouseX, mouseY, delta);
+		public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
+			super.render(ctx, mouseX, mouseY, delta);
 
 			int startTime = (int) (getSetting(0).asToggle().getChild(0).asSlider().getValue() * 1000);
 			reconnectButton.setMessage(Text.literal(
@@ -92,7 +94,7 @@ public class AutoReconnect extends Module {
 
 			if (reconnectTime + startTime < System.currentTimeMillis() && getSetting(0).asToggle().getState()) {
 				if (server != null)
-					ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client, ServerAddress.parse(server.address), server);
+					ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client, ServerAddress.parse(server.address), server, false, new CookieStorage(new java.util.HashMap<>(), new java.util.HashMap<>(), false));
 			}
 		}
 

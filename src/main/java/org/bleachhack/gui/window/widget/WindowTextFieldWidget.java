@@ -1,8 +1,12 @@
 package org.bleachhack.gui.window.widget;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.input.MouseInput;
 import net.minecraft.text.Text;
 
 
@@ -22,39 +26,37 @@ public class WindowTextFieldWidget extends WindowWidget {
 	}
 
 	@Override
-	public void render(MatrixStack matrices, int windowX, int windowY, int mouseX, int mouseY) {
+	public void render(DrawContext ctx, int windowX, int windowY, int mouseX, int mouseY) {
 		textField.setX(windowX + x1);
 		textField.setY(windowY + y1);
-		textField.render(matrices, mouseX, mouseY, MinecraftClient.getInstance().getTickDelta());
+		textField.render(ctx, mouseX, mouseY, MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false));
 
-		super.render(matrices, windowX, windowY, mouseX, mouseY);
+		super.render(ctx, windowX, windowY, mouseX, mouseY);
 	}
 
 	@Override
 	public void mouseClicked(int windowX, int windowY, int mouseX, int mouseY, int button) {
 		super.mouseClicked(windowX, windowY, mouseX, mouseY, button);
 
-		textField.mouseClicked(mouseX, mouseY, button);
+		textField.mouseClicked(new Click(mouseX, mouseY, new MouseInput(button, 0)), false);
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
-
-		textField.tick();
 	}
 
 	@Override
 	public void charTyped(char chr, int modifiers) {
 		super.charTyped(chr, modifiers);
 
-		textField.charTyped(chr, modifiers);
+		textField.charTyped(new CharInput(chr, modifiers));
 	}
 
 	@Override
 	public void keyPressed(int keyCode, int scanCode, int modifiers) {
 		super.keyPressed(keyCode, scanCode, modifiers);
 
-		textField.keyPressed(keyCode, scanCode, modifiers);
+		textField.keyPressed(new KeyInput(keyCode, scanCode, modifiers));
 	}
 }

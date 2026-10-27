@@ -20,6 +20,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 
 @Mixin(LivingEntity.class)
@@ -40,7 +41,7 @@ public abstract class MixinLivingEntity extends Entity {
 	}
 	
 	@Inject(method = "damage", at = @At("HEAD"), cancellable = true)
-	private void damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> callbackInfo) {
+	private void damage(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> callbackInfo) {
 		EventDamage.Normal event = new EventDamage.Normal(source, amount);
 		BleachHack.eventBus.post(event);
 		

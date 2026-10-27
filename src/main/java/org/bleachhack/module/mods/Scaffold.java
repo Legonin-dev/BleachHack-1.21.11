@@ -90,7 +90,7 @@ public class Scaffold extends Module {
 		double range = getSetting(2).asSlider().getValue();
 		int mode = getSetting(0).asMode().getMode();
 
-		Vec3d placeVec = mc.player.getPos().add(0, -0.85, 0);
+		Vec3d placeVec = mc.player.getEntityPos().add(0, -0.85, 0);
 		Set<BlockPos> blocks = mode == 0
 				? Sets.newHashSet(
 						BlockPos.ofFloored(placeVec),
@@ -101,10 +101,10 @@ public class Scaffold extends Module {
 						: getSpiral(mode, BlockPos.ofFloored(placeVec));
 
 		if (getSetting(6).asToggle().getState()
-				&& InputUtil.isKeyPressed(mc.getWindow().getHandle(), InputUtil.fromTranslationKey(mc.options.jumpKey.getBoundKeyTranslationKey()).getCode())) {
+				&& InputUtil.isKeyPressed(mc.getWindow(), InputUtil.fromTranslationKey(mc.options.jumpKey.getBoundKeyTranslationKey()).getCode())) {
 
-			if (mc.world.getBlockState(mc.player.getBlockPos().down()).getMaterial().isReplaceable()
-					&& !mc.world.getBlockState(mc.player.getBlockPos().down(2)).getMaterial().isReplaceable()
+			if (mc.world.getBlockState(mc.player.getBlockPos().down()).isReplaceable()
+					&& !mc.world.getBlockState(mc.player.getBlockPos().down(2)).isReplaceable()
 					&& mc.player.getVelocity().y > 0) {
 				mc.player.setVelocity(mc.player.getVelocity().x, -0.1, mc.player.getVelocity().z);
 

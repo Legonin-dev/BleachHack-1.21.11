@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.sound.Sound;
 import net.minecraft.client.sound.SoundInstance;
@@ -23,13 +24,13 @@ import net.minecraft.client.sound.TickableSoundInstance;
 @Mixin(SoundSystem.class)
 public class MixinSoundSystem {
 
-	@Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)V", at = @At("HEAD"), cancellable = true)
-	private void play(SoundInstance soundInstance, CallbackInfo ci) {
+	@Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)Lnet/minecraft/client/sound/SoundSystem$PlayResult;", at = @At("HEAD"), cancellable = true)
+	private void play(SoundInstance soundInstance, CallbackInfoReturnable<SoundSystem.PlayResult> ci) {
 		EventSoundPlay.Normal event = new EventSoundPlay.Normal(soundInstance);
 		BleachHack.eventBus.post(event);
 
 		if (event.isCancelled()) {
-			ci.cancel();
+			ci.setReturnValue(SoundSystem.PlayResult.NOT_STARTED);
 		}
 	}
 

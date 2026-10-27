@@ -35,13 +35,13 @@ public class Jesus extends Module {
 		if (e.isSneaking() || e.fallDistance > 3f) 
 			return;
 
-		if (isSubmerged(e.getPos().add(0, 0.3, 0))) {
+		if (isSubmerged(e.getEntityPos().add(0, 0.3, 0))) {
 			e.setVelocity(e.getVelocity().x, 0.08, e.getVelocity().z);
-		} else if (isSubmerged(e.getPos().add(0, 0.1, 0))) {
+		} else if (isSubmerged(e.getEntityPos().add(0, 0.1, 0))) {
 			e.setVelocity(e.getVelocity().x, 0.05, e.getVelocity().z);
-		} else if (isSubmerged(e.getPos().add(0, 0.05, 0))) {
+		} else if (isSubmerged(e.getEntityPos().add(0, 0.05, 0))) {
 			e.setVelocity(e.getVelocity().x, 0.01, e.getVelocity().z);
-		} else if (isSubmerged(e.getPos())) {
+		} else if (isSubmerged(e.getEntityPos())) {
 			e.setVelocity(e.getVelocity().x, -0.005, e.getVelocity().z);
 			e.setOnGround(true);
 		}

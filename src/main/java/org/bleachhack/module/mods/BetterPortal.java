@@ -34,10 +34,7 @@ public class BetterPortal extends Module {
 	@BleachSubscribe
 	public void onClientMove(EventClientMove event) {
 		if (getSetting(1).asToggle().getState()) {
-			if (WorldUtils.doesBoxTouchBlock(mc.player.getBoundingBox(), Blocks.NETHER_PORTAL)) {
-				mc.player.lastNauseaStrength = -1f;
-				mc.player.nextNauseaStrength = -1f;
-			}
+			// Portal nausea strength is no longer exposed in 1.21.11.
 		}
 	}
 

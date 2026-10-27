@@ -13,7 +13,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
+import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
 import net.minecraft.util.math.BlockPos;
@@ -62,7 +62,7 @@ public class Search extends Module {
 
 				SettingList<Block> list = getSetting(5).asList(Block.class);
 				for (int x = 0; x < 16; x++) {
-					for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
+					for (int y = mc.world.getBottomY(); y < mc.world.getHeight(); y++) {
 						for (int z = 0; z < 16; z++) {
 							BlockPos pos = new BlockPos(cp.getStartX() + x, y, cp.getStartZ() + z);
 							BlockState state = chunk.getBlockState(pos);
@@ -80,7 +80,7 @@ public class Search extends Module {
 									if (be != null) {
 										logBuilder
 										.append(" BlockEntity")
-										.append(be.createNbt().asString());
+										.append(be.createNbt(mc.world.getRegistryManager()).toString());
 									}
 
 									logBuilder.append('\n');
@@ -211,7 +211,7 @@ public class Search extends Module {
 				Vec3d lookVec = new Vec3d(0, 0, 75)
 						.rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
 						.rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))
-						.add(mc.cameraEntity.getEyePos());
+						.add(mc.getCameraEntity().getEyePos());
 
 				Renderer.drawLine(
 						lookVec.x, lookVec.y, lookVec.z,

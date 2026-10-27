@@ -15,16 +15,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.client.render.MapRenderState;
 import net.minecraft.client.render.MapRenderer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.map.MapState;
 
 @Mixin(MapRenderer.class)
 public class MixinMapRenderer {
 
 	@Inject(method = "draw", at = @At("HEAD"), cancellable = true)
-	private void draw(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int id, MapState state, boolean hidePlayerIcons, int light, CallbackInfo ci) {
+	private void draw(MapRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, boolean hidePlayerIcons, int light, CallbackInfo ci) {
 		if (ModuleManager.getModule(NoRender.class).isWorldToggled(3)) {
 			ci.cancel();
 		}

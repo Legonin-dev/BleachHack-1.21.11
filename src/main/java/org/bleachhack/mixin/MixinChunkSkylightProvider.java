@@ -13,17 +13,24 @@ import org.bleachhack.module.mods.NoRender;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.world.chunk.light.ChunkSkyLightProvider;
 
 @Mixin(ChunkSkyLightProvider.class)
 public class MixinChunkSkylightProvider {
 
-	@Inject(method = "recalculateLevel", at = @At("HEAD"), cancellable = true)
-	private void recalculateLevel(long id, long excludedId, int maxLevel, CallbackInfoReturnable<Integer> ci) {
+	@Inject(method = "propagateLightIncrease", at = @At("HEAD"), cancellable = true)
+	private void propagateLightIncrease(long id, long excludedId, int maxLevel, CallbackInfo ci) {
 		if (ModuleManager.getModule(NoRender.class).isWorldToggled(4)) {
-			ci.setReturnValue(0);
+			ci.cancel();
+		}
+	}
+
+	@Inject(method = "propagateLightDecrease", at = @At("HEAD"), cancellable = true)
+	private void propagateLightDecrease(long id, long excludedId, CallbackInfo ci) {
+		if (ModuleManager.getModule(NoRender.class).isWorldToggled(4)) {
+			ci.cancel();
 		}
 	}
 }

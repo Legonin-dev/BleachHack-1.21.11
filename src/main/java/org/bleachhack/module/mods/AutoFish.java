@@ -78,7 +78,7 @@ public class AutoFish extends Module {
 			if (is.getItem() != Items.FISHING_ROD)
 				return -1;
 
-			return EnchantmentHelper.get(is).values().stream().mapToInt(Integer::intValue).sum();
+			return EnchantmentHelper.getEnchantments(is).getEnchantmentEntries().stream().mapToInt(e -> e.getIntValue()).sum();
 		}));
 
 		if (mc.player.getInventory().getStack(slot).getItem() == Items.FISHING_ROD) {
